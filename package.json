@@ -9,6 +9,7 @@
   "author": "Alejandro Oropeza",
   "license": "MIT",
   "dependencies": {
+    "bluebird": "^3.7.2",
     "puppeteer": "^2.0.0"
   }
 }

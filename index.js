@@ -1,3 +1,6 @@
+"use strict";
+
+var bluebird = require("bluebird");
 const puppeteer = require("puppeteer");
 
 const delay = time =>
@@ -5,17 +8,39 @@ const delay = time =>
     setTimeout(resolve, time);
   });
 
-const waitToElementDisappear = async (elementId, time, page) => {
-  let loading = await page.$$(elementId);
+const waitToElementDisappear = async (elementId, time, _page) => {
+  let loading = await _page.$$(elementId);
 
   if (loading.length > 0) {
-    console.log("loading exists", loading);
+    console.log(
+      `element ${elementId} still exists, testing again in ${time} ms`
+    );
 
     await delay(time);
-    await waitToElementDisappear(elementId, time, page);
-  } else {
-    return;
+    await waitToElementDisappear(elementId, time, _page);
   }
+};
+
+const getMoviesName = async (city, _page) => {
+  // select cities
+  await _page.select("#cmbCiudadesCartelera", city);
+
+  await waitToElementDisappear("#preloadCartelera", 200, _page);
+
+  return _page.evaluate(() => {
+    var allItemList = Array.from(
+      document.querySelectorAll("ul.listCartelera>li")
+    );
+
+    var moviesNames = [];
+    allItemList.forEach(movie => {
+      var h1Title = movie.querySelector("h1");
+      if (h1Title) {
+        moviesNames.push(h1Title.innerText);
+      }
+    });
+    return moviesNames;
+  });
 };
 
 (async () => {
@@ -28,29 +53,25 @@ const waitToElementDisappear = async (elementId, time, page) => {
       waitUntil: "domcontentloaded"
     });
 
-    await page.select("#cmbCiudadesCartelera", "24");
+    // 20 CDMX Centro
+    // 21 CDMX Norte
+    // 22 CDMX Oriente
+    // 23 CDMX Poniente
+    // 24 CDMX Sur
 
-    await waitToElementDisappear("#preloadCartelera", 200, page);
+    const cities = [
+      { "20": "CDMX Centro" },
+      { "21": "CDMX Norte" },
+      { "22": "CDMX Oriente" },
+      { "23": "CDMX Poniente" },
+      { "24": "CDMX Sur" }
+    ];
 
-    const li = await page.evaluate(() => {
-      while (document.getElementById("preloadCartelera") != undefined) {
-        console.log("waiting loading...");
-      }
-      var listMovies = Array.from(
-        document.querySelectorAll("ul.listCartelera>li")
-      );
+    const result = await bluebird.mapSeries(cities, item =>
+      getMoviesName(Object.keys(item)[0], page)
+    );
 
-      var moviesNames = [];
-      listMovies.forEach(movie => {
-        var h1Title = movie.querySelector("h1");
-        if (h1Title) {
-          moviesNames.push(h1Title.innerText);
-        }
-      });
-      return moviesNames;
-    });
-
-    console.log("moviesNames", li);
+    console.log("moviesNames", result);
 
     await browser.close();
   } catch (e) {
