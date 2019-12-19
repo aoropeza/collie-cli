@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.7.2",
+    "lodash": "^4.17.15",
     "puppeteer": "^2.0.0"
   }
 }
