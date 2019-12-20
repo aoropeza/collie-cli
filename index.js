@@ -15,16 +15,13 @@ const delay = time =>
   });
 
 const waitForElements = async (selector, time, _page) => {
-  let loading = await _page.$$(selector);
+  let elementsToWait = await _page.$$(selector);
 
-  if (loading.length > 0) {
+  if (elementsToWait.length > 0) {
     console.log(`many element for ${selector}, finishing`);
 
-    console.log("loading");
-    console.log(loading);
-
     await delay(time);
-    return;
+    return elementsToWait;
   }
   console.log(`zero elements for ${selector}, testing again in ${time} ms`);
   await delay(time);
@@ -103,22 +100,34 @@ const scrapeMoviesInfo = async (city, _page) => {
 
     const urlSchedules = `${baseUrlBrand}${resultUnique[0].anchorSchedules}`;
 
-    /*
     console.log(`urlSchedules: ${urlSchedules}`);
     await page.goto(urlSchedules, optionsGoTo);
 
-    await waitForElements("ul.chosen-choices>li.search-choice", 200, page);
+    await waitForElements(
+      "#cmbComplejo_chosen>ul.chosen-choices>li.search-choice",
+      200,
+      page
+    );
 
     delay(10000);
     const result = await page.evaluate(() => {
-      var allItemList = Array.from(
-        document.querySelectorAll("ul.chosen-choices>li")
+      var locations = Array.from(
+        document.querySelectorAll(
+          "#cmbComplejo_chosen>ul.chosen-choices>li.search-choice>span"
+        )
       );
-      return allItemList.length;
+
+      var locationsNames = [];
+      locations.forEach(location => {
+        locationsNames.push({
+          name: location.innerText
+        });
+      });
+      return locationsNames;
     });
 
-    console.log(`result locations: ${result}`);
-    */
+    console.log(`result locations: ${result.length}`);
+    console.log(result);
 
     await browser.close();
   } catch (e) {
