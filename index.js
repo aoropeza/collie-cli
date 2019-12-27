@@ -1,137 +1,70 @@
-"use strict";
+'use strict'
 
-const bluebird = require("bluebird");
-const puppeteer = require("puppeteer");
-const { flattenDepth, uniqBy } = require("lodash");
+const util = require('util')
 
-const optionsGoTo = {
-  timeout: 0,
-  waitUntil: "domcontentloaded"
-};
+const puppeteer = require('puppeteer')
+const { uniqBy, flattenDepth } = require('lodash')
 
-const delay = time =>
-  new Promise(resolve => {
-    setTimeout(resolve, time);
-  });
+const {
+  ScrapperImp: ScrapperImpCinepolis
+} = require('./src/implementations/cinepolis/ScrapperImp')
+const {
+  BrandImp: BrandImpCinepolis
+} = require('./src/implementations/cinepolis/BrandImp')
+const {
+  MovieImp: MovieImpCinepolis
+} = require('./src/implementations/cinepolis/MovieImp')
+const {
+  ScrapperImp: ScrapperImpCinemex
+} = require('./src/implementations/cinemex/ScrapperImp')
+const {
+  BrandImp: BrandImpCinemex
+} = require('./src/implementations/cinemex/BrandImp')
 
-const waitForElements = async (selector, time, _page) => {
-  let elementsToWait = await _page.$$(selector);
-
-  if (elementsToWait.length > 0) {
-    console.log(`many element for ${selector}, finishing`);
-
-    await delay(time);
-    return elementsToWait;
-  }
-  console.log(`zero elements for ${selector}, testing again in ${time} ms`);
-  await delay(time);
-  await waitForElements(selector, time, _page);
-};
-
-const scrapeMoviesInfo = async (city, _page) => {
-  // select cities
-  await _page.select("#cmbCiudadesCartelera", city);
-
-  await waitForElements("ul.listCartelera>li", 200, _page);
-
-  return _page.evaluate(() => {
-    var allItemList = Array.from(
-      document.querySelectorAll("ul.listCartelera>li")
-    );
-
-    var moviesNames = [];
-    allItemList.forEach(movie => {
-      var h1Title = movie.querySelector("h1");
-      var anchorCover = movie.querySelector("figure");
-
-      var anchorSchedules = null;
-      if (movie.querySelector(".btn-call")) {
-        var anchorsActions = Array.from(
-          movie.querySelector(".btn-call").querySelectorAll("a")
-        );
-
-        anchorsActions.forEach(anchor => {
-          var anchorClass = anchor.getAttribute("class");
-          if (typeof anchorClass != "string") {
-            anchorSchedules = anchor.getAttribute("href");
-          }
-        });
-      }
-
-      if (h1Title) {
-        moviesNames.push({
-          name: h1Title.innerText,
-          cover: anchorCover
-            ? anchorCover.querySelector("img").getAttribute("src")
-            : null,
-          anchorSchedules
-        });
-      }
-    });
-    return moviesNames;
-  });
-};
-
-(async () => {
+const run = async () => {
   try {
-    const baseUrlBrand = "https://cinepolis.com/";
-    const browser = await puppeteer.launch({ headless: false });
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1000, height: 800 });
-    await page.goto(baseUrlBrand, optionsGoTo);
+    console.log('start')
 
-    const cities = [
-      {
-        id: "20",
-        key: "cdmx-centro"
-      } /*,
-      { id: "21", key: "cdmx-norte" },
-      { id: "22", key: "cdmx-oriente" },
-      { id: "23", key: "cdmx-poniente" },
-      { id: "24", key: "cdmx-sur" }*/
-    ];
+    const browser = await puppeteer.launch({ headless: false })
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1000, height: 800 })
 
-    const arrayResults = await bluebird.mapSeries(cities, item =>
-      scrapeMoviesInfo(item.id, page)
-    );
-    const resultUnique = uniqBy(flattenDepth(arrayResults), "name");
+    /**
+     * BRAND CINEPOLIS
+     */
+    const brandImpCinepolis = new BrandImpCinepolis('Cinépolis', page)
+    const movieImpCinepolis = new MovieImpCinepolis(page)
+    const scrapperImpCinepolis = new ScrapperImpCinepolis(
+      'http://cinepolis.com',
+      brandImpCinepolis,
+      movieImpCinepolis,
+      page,
+      { uniqBy, flattenDepth }
+    )
+    await scrapperImpCinepolis.start()
 
-    console.log("Finishing getting movies for all cities:", resultUnique);
+    const nextObj = await scrapperImpCinepolis.next()
+    console.log('--------> Next')
+    console.log(util.inspect(nextObj, false, null, true /* enable colors */))
 
-    const urlSchedules = `${baseUrlBrand}${resultUnique[0].anchorSchedules}`;
-
-    console.log(`urlSchedules: ${urlSchedules}`);
-    await page.goto(urlSchedules, optionsGoTo);
-
-    await waitForElements(
-      "#cmbComplejo_chosen>ul.chosen-choices>li.search-choice",
-      200,
+    /**
+     * BRAND CINEMEX
+     */
+    /*const brandImpCinemex = new BrandImpCinemex(
+      'http://cinemex.com',
+      'Cinemex',
       page
-    );
+    )
+    const scrapperImpCinemex = new ScrapperImpCinemex(brandImpCinemex, page)
+    await scrapperImpCinemex.start()
 
-    delay(10000);
-    const result = await page.evaluate(() => {
-      var locations = Array.from(
-        document.querySelectorAll(
-          "#cmbComplejo_chosen>ul.chosen-choices>li.search-choice>span"
-        )
-      );
-
-      var locationsNames = [];
-      locations.forEach(location => {
-        locationsNames.push({
-          name: location.innerText
-        });
-      });
-      return locationsNames;
-    });
-
-    console.log(`result locations: ${result.length}`);
-    console.log(result);
-
-    await browser.close();
+    const nextObj2 = await scrapperImpCinemex.next()
+    console.log('--------> Next2', nextObj2)
+    */
+    await browser.close()
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
-})();
-// bgpreload_Gris ng-hide
+}
+
+run()

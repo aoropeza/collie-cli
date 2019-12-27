@@ -4,7 +4,10 @@
   "description": "CLI for collie",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "format": "prettier --write \"**/*.{js,json,md,yaml}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md,yaml}\"",
+    "lint": "npm run format:check && eslint .",
+    "test": "jest --forceExit"
   },
   "author": "Alejandro Oropeza",
   "license": "MIT",
@@ -12,5 +15,20 @@
     "bluebird": "^3.7.2",
     "lodash": "^4.17.15",
     "puppeteer": "^2.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.7.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jest": "^23.0.4",
+    "jest": "^24.9.0",
+    "prettier": "^1.19.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
   }
 }
