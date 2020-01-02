@@ -1,12 +1,12 @@
 'use strict'
 
-const { Movie } = require('../../templates/Movie')
+const { MoviesBy } = require('../../templates/MoviesBy')
 
-class MovieImp extends Movie {
-  async startScrapeMoviesByCountry(country) {
+class MoviesByCountryImp extends MoviesBy {
+  async startScrapper() {
     const mainSelector = 'ul.listCartelera>li'
 
-    await this._page.select('#cmbCiudadesCartelera', country.id)
+    await this._page.select('#cmbCiudadesCartelera', this._filter.id)
 
     await this._page.waitFor(
       selector => {
@@ -29,14 +29,14 @@ class MovieImp extends Movie {
                 .getAttribute('src'),
               anchorSchedule: item
                 .querySelector('.btn-call')
-                .querySelector('a:not(.lnkCartelera)')
+                .querySelector('a[onclick*="LinkSinopsis"]')
                 .getAttribute('href')
             }
           : {}
       })
     )
-    return allMovies.filter(item => Object.keys(item).length > 0)
+    this._movies = allMovies.filter(item => Object.keys(item).length > 0)
   }
 }
 
-module.exports = { MovieImp }
+module.exports = { MoviesByCountryImp }

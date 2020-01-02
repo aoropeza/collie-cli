@@ -87,7 +87,8 @@ const scrapeMoviesInfoByCity = async (city, _page) => {
     )
     const movies = uniqBy(flattenDepth(moviesByCities), 'name')
     console.log('Finished get movies for all cities')
-
+    /******************/
+    /******************/
     /**
      * Scrapping: Getting locations by movie
      */
@@ -122,6 +123,9 @@ const scrapeMoviesInfoByCity = async (city, _page) => {
     console.log(`result locations: ${locations.length}`)
     console.log(locations)
 
+    /******************/
+    /******************/
+
     /**
      * Unselect all locations
      */
@@ -137,7 +141,8 @@ const scrapeMoviesInfoByCity = async (city, _page) => {
     })
 
     // TODO Guarantee all options are unselected
-
+    /******************/
+    /******************/
     /**
      * Select one by one
      */
