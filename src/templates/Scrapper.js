@@ -4,85 +4,119 @@
 'use strict'
 
 const { Config } = require('../config')
+const logger = require('../logger')('collie:cli:Scrapper')
 
 class Scrapper {
   constructor(
     page,
     { nameBrand, baseUrl },
     BrandImpClass,
-    MoviesByCountryImpClass,
-    LocationsByCountryMovieImpClass,
-    SchedulesByLocationMovieImpClass,
+    MoviesByCityImpClass,
+    LocationsByMovieAndCityImpClass,
+    SchedulesByMovieCityAndLocationImpClass,
     { uniqBy, flattenDepth }
   ) {
     this._baseUrl = baseUrl
     this._page = page
+    this.lastKeyUrl = ''
 
     this._brand = new BrandImpClass(nameBrand, this._page)
-    this._MoviesByCountryImpClass = MoviesByCountryImpClass
-    this._LocationsByCountryMovieImpClass = LocationsByCountryMovieImpClass
-    this._SchedulesByLocationMovieImpClass = SchedulesByLocationMovieImpClass
+    this._MoviesByCityImpClass = MoviesByCityImpClass
+    this._LocationsByMovieAndCityImpClass = LocationsByMovieAndCityImpClass
+    this._SchedulesByMovieCityAndLocationImpClass = SchedulesByMovieCityAndLocationImpClass
 
     this._uniqBy = uniqBy
     this._flattenDepth = flattenDepth
 
+    this._cities = []
     this._movies = []
+    this._moviesByCityMerged = []
     this._locations = []
   }
 
   async start() {
     await this._page.goto(this._baseUrl, Config.gotoOptions)
+    /**
+     * Getting all CITIES in this._brand.cities
+     */
     await this._brand.startScrapper()
 
-    for (const item of this._brand.countries) {
-      const moviesByCountry = new this._MoviesByCountryImpClass(
-        this._page,
-        item
-      )
-      await moviesByCountry.startScrapper()
-      this._movies.push(moviesByCountry)
-    }
+    this._movies = await this.gettingAllMovies()
+    this._movies = this._movies.slice(18, 20)
+    logger.info('==========')
+    logger.info(this._movies)
 
-    const moviesUniq = this._uniqBy(
-      this._flattenDepth(this._movies.map(item => item.movies)),
+    this._moviesByCityMerged = await this.mergeMoviesByCountry()
+
+    for (const movieByCountry of this._moviesByCityMerged) {
+      await this.goOrNotGo(movieByCountry.movie.anchorSchedule)
+
+      const locationsByMovieAndCity = new this._LocationsByMovieAndCityImpClass(
+        this._page,
+        {
+          movie: movieByCountry.movie,
+          city: movieByCountry.city
+        }
+      )
+      await locationsByMovieAndCity.startScrapper()
+      this._locations.push(locationsByMovieAndCity)
+      logger.info(
+        `locationsByMovieAndCity.locations: `,
+        locationsByMovieAndCity.locations.length
+      )
+
+      for (const location of locationsByMovieAndCity.locations) {
+        logger.info(
+          `movie: ${locationsByMovieAndCity.filter.movie.name}, location: ${location.name}`
+        )
+        const scheduleByMovieCityAndLocation = new this._SchedulesByMovieCityAndLocationImpClass(
+          this._page,
+          {
+            selectedLocation: location,
+            allLocations: locationsByMovieAndCity.locations,
+            date: '04 enero'
+          }
+        )
+        await scheduleByMovieCityAndLocation.startScrapper()
+      }
+    }
+  }
+
+  async goOrNotGo(newUrlKey) {
+    if (this.lastKeyUrl !== newUrlKey) {
+      this.lastKeyUrl = newUrlKey
+      const gotoUrl = `${this._baseUrl}/${this.lastKeyUrl}`
+      logger.info(`gotoUrl: ${gotoUrl}`)
+      await this._page.goto(gotoUrl, Config.gotoOptions)
+    }
+  }
+
+  async gettingAllMovies() {
+    let movies = []
+    for (const item of this._brand.cities) {
+      const moviesByCountry = new this._MoviesByCityImpClass(this._page, item)
+      await moviesByCountry.startScrapper()
+      movies.push(moviesByCountry)
+    }
+    /**
+     * Zipping and Unique
+     */
+    movies = this._uniqBy(
+      this._flattenDepth(movies.map(item => item.movies)),
       'name'
     )
 
-    for (const movie of moviesUniq.slice(0, 2)) {
-      const urlMovieDetail = `${this._baseUrl}/${movie.anchorSchedule}`
-      console.log(`urlMovieDetail: ${urlMovieDetail}`)
-      await this._page.goto(urlMovieDetail, Config.gotoOptions)
+    return movies
+  }
 
-      for (const country of this._brand.countries) {
-        const locationsByCountryMovie = new this._LocationsByCountryMovieImpClass(
-          this._page,
-          {
-            movie,
-            country
-          }
-        )
-        await locationsByCountryMovie.startScrapper()
-        this._locations.push(locationsByCountryMovie)
-        console.log(
-          `locationsByCountryMovie.locations: `,
-          locationsByCountryMovie.locations.length
-        )
-
-        for (const location of locationsByCountryMovie.locations) {
-          console.log(
-            `movie: ${locationsByCountryMovie.filter.movie.name}, location: ${location.name}`
-          )
-          const scheduleByLocationsMovie = new this._SchedulesByLocationMovieImpClass(
-            this._page,
-            {
-              selectedLocation: location,
-              allLocations: locationsByCountryMovie.locations
-            }
-          )
-          await scheduleByLocationsMovie.startScrapper()
-        }
+  async mergeMoviesByCountry() {
+    const moviesByCity = []
+    for (const movie of this._movies) {
+      for (const city of this._brand.cities) {
+        moviesByCity.push({ movie, city })
       }
     }
+    return moviesByCity
   }
 
   // eslint-disable-next-line class-methods-use-this

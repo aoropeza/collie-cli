@@ -12,14 +12,14 @@ const {
   BrandImp: BrandImpCinepolis
 } = require('./src/implementations/cinepolis/BrandImp')
 const {
-  MoviesByCountryImp: MoviesByCountryImpCinepolis
-} = require('./src/implementations/cinepolis/MoviesByCountryImp')
+  MoviesByCityImp: MoviesByCityImpCinepolis
+} = require('./src/implementations/cinepolis/MoviesByCityImp')
 const {
-  LocationsByCountryMovie: LocationsByCountryMovieImpCinepolis
-} = require('./src/implementations/cinepolis/LocationsByCountryMovie')
+  LocationsByMovieAndCity: LocationsByMovieAndCityImpCinepolis
+} = require('./src/implementations/cinepolis/LocationsByMovieAndCity')
 const {
-  SchedulesByLocationMovie: SchedulesByLocationMovieImpCinepolis
-} = require('./src/implementations/cinepolis/SchedulesByLocationMovie')
+  SchedulesByMovieCityAndLocation: SchedulesByMovieCityAndLocationImpCinepolis
+} = require('./src/implementations/cinepolis/SchedulesByMovieCityAndLocation')
 const {
   ScrapperImp: ScrapperImpCinemex
 } = require('./src/implementations/cinemex/ScrapperImp')
@@ -42,9 +42,9 @@ const run = async () => {
       page,
       { nameBrand: 'Cinépolis', baseUrl: 'http://cinepolis.com' },
       BrandImpCinepolis,
-      MoviesByCountryImpCinepolis,
-      LocationsByCountryMovieImpCinepolis,
-      SchedulesByLocationMovieImpCinepolis,
+      MoviesByCityImpCinepolis,
+      LocationsByMovieAndCityImpCinepolis,
+      SchedulesByMovieCityAndLocationImpCinepolis,
       { uniqBy, flattenDepth }
     )
     await scrapperImpCinepolis.start()

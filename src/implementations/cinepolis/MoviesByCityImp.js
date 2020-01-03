@@ -2,7 +2,7 @@
 
 const { MoviesBy } = require('../../templates/MoviesBy')
 
-class MoviesByCountryImp extends MoviesBy {
+class MoviesByCityImp extends MoviesBy {
   async startScrapper() {
     const mainSelector = 'ul.listCartelera>li'
 
@@ -39,4 +39,4 @@ class MoviesByCountryImp extends MoviesBy {
   }
 }
 
-module.exports = { MoviesByCountryImp }
+module.exports = { MoviesByCityImp }

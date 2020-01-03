@@ -13,5 +13,11 @@ class Config {
       timeout: 60
     }
   }
+
+  static get waitForOptionsImmediately() {
+    return {
+      timeout: 1000
+    }
+  }
 }
 module.exports = { Config }

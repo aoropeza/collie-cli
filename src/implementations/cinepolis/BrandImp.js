@@ -9,20 +9,18 @@ class BrandImp extends Brand {
     this._logo = await this._page.$eval('#img_logomaster', el => el.src)
   }
 
-  async scrapeCountries() {
+  async scrapeCities() {
     await this._page.waitForSelector('#cmbCiudades', Config.waitForOptions)
-    const allCountries = await this._page.$$eval(
-      '#cmbCiudades>option',
-      options =>
-        options.map(items => {
-          return {
-            id: items.getAttribute('value'),
-            key: items.getAttribute('clave'),
-            text: items.innerText
-          }
-        })
+    const allCities = await this._page.$$eval('#cmbCiudades>option', options =>
+      options.map(items => {
+        return {
+          id: items.getAttribute('value'),
+          key: items.getAttribute('clave'),
+          text: items.innerText
+        }
+      })
     )
-    this._countries = allCountries.filter(
+    this._cities = allCities.filter(
       item => item.text.includes('CDMX') || item.text.includes('cdmx')
     )
   }

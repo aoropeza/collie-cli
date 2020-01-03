@@ -7,31 +7,31 @@ class Brand {
     this._name = name
     this._page = page
     this._logo = ''
-    this._countries = [
+    this._cities = [
       /* {key:1, value:cdmx-center} */
     ]
   }
 
   async startScrapper() {
     await this.scrapeLogo()
-    await this.scrapeCountries()
+    await this.scrapeCities()
   }
 
   async scrapeLogo() {
     throw new Error('Please implement this in inheritors')
   }
 
-  async scrapeCountries() {
+  async scrapeCities() {
     throw new Error('Please implement this in inheritors')
   }
 
-  get countries() {
-    return this._countries
+  get cities() {
+    return this._cities
   }
 
   get json() {
     return {
-      countries: this._countries,
+      cities: this._cities,
       name: this._name,
       logo: this._logo
     }
