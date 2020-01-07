@@ -4,12 +4,12 @@
 'use strict'
 
 const { Config } = require('../config')
-const logger = require('../logger')('collie:cli:Scrapper')
+const logger = require('../logger')('collie:cli:Template:Scrapper')
 
 class Scrapper {
   constructor(
     page,
-    { nameBrand, baseUrl },
+    { nameBrand, baseUrl, dateToFilter },
     BrandImpClass,
     MoviesByCityImpClass,
     LocationsByMovieAndCityImpClass,
@@ -18,6 +18,7 @@ class Scrapper {
   ) {
     this._baseUrl = baseUrl
     this._page = page
+    this._dateToFilter = dateToFilter
     this.lastKeyUrl = ''
 
     this._brand = new BrandImpClass(nameBrand, this._page)
@@ -42,7 +43,7 @@ class Scrapper {
     await this._brand.startScrapper()
 
     this._movies = await this.gettingAllMovies()
-    this._movies = this._movies.slice(18, 20)
+    this._movies = this._movies.slice(18, 19)
     logger.info('==========')
     logger.info(this._movies)
 
@@ -74,7 +75,7 @@ class Scrapper {
           {
             selectedLocation: location,
             allLocations: locationsByMovieAndCity.locations,
-            date: '04 enero'
+            date: this._dateToFilter
           }
         )
         await scheduleByMovieCityAndLocation.startScrapper()

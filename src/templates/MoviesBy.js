@@ -2,6 +2,8 @@
 
 'use strict'
 
+const logger = require('../logger')('collie:cli:Template:MoviesBy')
+
 class MoviesBy {
   constructor(page, filter) {
     this._page = page
@@ -10,6 +12,7 @@ class MoviesBy {
   }
 
   async startScrapper() {
+    logger.info('startScrapper')
     throw new Error('Please implement this in inheritors')
   }
 

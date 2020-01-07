@@ -5,10 +5,13 @@
 
 const { LocationsBy } = require('../../templates/LocationsBy')
 const { Config } = require('../../config')
+const logger = require('../../logger')(
+  'collie:cli:Template:Cinepolis:LocationsByMovieAndCity'
+)
 
 class LocationsByMovieAndCity extends LocationsBy {
   async scrapeLocations() {
-    console.log(`Setting country: ${this._filter.city.key}`)
+    logger.info(`Setting country: ${this._filter.city.key}`)
 
     try {
       await this._page.waitFor(
@@ -45,14 +48,15 @@ class LocationsByMovieAndCity extends LocationsBy {
         item => Object.keys(item).length > 0
       )
     } catch (e) {
-      console.log(`Movie don't have locations for this citie`)
+      logger.error(`Movie don't have locations for this citie`)
     }
   }
 
   async unSelectLocation() {
+    logger.info('unSelectLocation')
     for (const location of this._locations) {
       const selector = `#cmbComplejo_chosen>ul.chosen-choices>li.search-choice>a[data-option-array-index="${location.index}"]`
-      console.log(selector)
+      logger.info(selector)
       const button = await this._page.$(selector)
       await button.click()
     }

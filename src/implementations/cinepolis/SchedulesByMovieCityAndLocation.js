@@ -4,9 +4,13 @@
 'use strict'
 
 const { SchedulesBy } = require('../../templates/SchedulesBy')
+const logger = require('../../logger')(
+  'collie:cli:Template:Cinepolis:SchedulesByMovieCityAndLocation'
+)
 
 class SchedulesByMovieCityAndLocation extends SchedulesBy {
   async startScrapper() {
+    logger.info('startScrapper')
     await this._page.click(
       `#cmbComplejo_chosen ul.chosen-choices>li.search-field>input`,
       { clickCount: 3 }
@@ -23,7 +27,7 @@ class SchedulesByMovieCityAndLocation extends SchedulesBy {
     const button = await this._page.$(selector)
     await button.click()
 
-    console.log(selector)
+    logger.info(selector)
     await this._page.select('#cmbFechas', this._filter.date)
 
     /**
@@ -40,7 +44,8 @@ class SchedulesByMovieCityAndLocation extends SchedulesBy {
       }, item)
     )
     const times = await Promise.all(promisesToScrappedTimes)
-    console.log('times: ', times)
+    logger.info('times: ')
+    logger.info(times)
   }
 }
 module.exports = { SchedulesByMovieCityAndLocation }

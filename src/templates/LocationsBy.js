@@ -2,6 +2,8 @@
 
 'use strict'
 
+const logger = require('../logger')('collie:cli:Template:LocationsBy')
+
 class LocationsBy {
   constructor(page, filter) {
     this._page = page
@@ -10,15 +12,18 @@ class LocationsBy {
   }
 
   async startScrapper() {
+    logger.info('startScrapper')
     await this.scrapeLocations()
     await this.unSelectLocation()
   }
 
   async scrapeLocations() {
+    logger.info('scrapeLocations')
     throw new Error('Please implement this in inheritors')
   }
 
   async unSelectLocation() {
+    logger.info('unSelectLocation')
     throw new Error('Please implement this in inheritors')
   }
 

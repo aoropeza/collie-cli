@@ -40,7 +40,11 @@ const run = async () => {
      */
     const scrapperImpCinepolis = new ScrapperImpCinepolis(
       page,
-      { nameBrand: 'Cinépolis', baseUrl: 'http://cinepolis.com' },
+      {
+        nameBrand: 'Cinépolis',
+        baseUrl: 'http://cinepolis.com',
+        dateToFilter: '08 enero'
+      },
       BrandImpCinepolis,
       MoviesByCityImpCinepolis,
       LocationsByMovieAndCityImpCinepolis,

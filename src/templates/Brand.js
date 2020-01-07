@@ -2,6 +2,8 @@
 
 'use strict'
 
+const logger = require('../logger')('collie:cli:Template:Brand')
+
 class Brand {
   constructor(name, page) {
     this._name = name
@@ -13,15 +15,18 @@ class Brand {
   }
 
   async startScrapper() {
+    logger.info('startScrapper')
     await this.scrapeLogo()
     await this.scrapeCities()
   }
 
   async scrapeLogo() {
+    logger.info('scrapeLogo')
     throw new Error('Please implement this in inheritors')
   }
 
   async scrapeCities() {
+    logger.info('scrapeCities')
     throw new Error('Please implement this in inheritors')
   }
 
