@@ -2,9 +2,11 @@
 
 const util = require('util')
 
+const args = require('args')
 const puppeteer = require('puppeteer')
 const { uniqBy, flattenDepth } = require('lodash')
 
+const logger = require('./src/logger')('collie:cli:Main:index')
 const {
   ScrapperImp: ScrapperImpCinepolis
 } = require('./src/implementations/cinepolis/ScrapperImp')
@@ -27,19 +29,45 @@ const {
   BrandImp: BrandImpCinemex
 } = require('./src/implementations/cinemex/BrandImp')
 
-const run = async () => {
+args
+  .option(
+    ['t', 'timeoutpage'],
+    'Max timeout in milliseconds to wait a page.',
+    60000
+  )
+  .option(
+    ['o', 'timeoutobject'],
+    'Max timeout in milliseconds to wait a object.',
+    60
+  )
+  .option(['c', 'cinepolis'], 'Run script for this specific brand.')
+  .option(['x', 'cinemex'], 'Run script for this specific brand.')
+  .option(
+    'maxmovies',
+    'Max number of movies to scrapped. Default all movies found.'
+  )
+  .option('retry', 'Max number of times to retried the script by brand.', 2)
+
+const flags = args.parse(process.argv)
+let browser
+let page
+let retries = flags.retry
+
+const preparePuppeteer = async () => {
+  browser = await puppeteer.launch({ headless: false })
+  page = await browser.newPage()
+  await page.setViewport({ width: 1000, height: 800 })
+}
+
+const closePuppeteer = async () => {
+  await browser.close()
+}
+
+const cinepolisScrapper = async () => {
   try {
-    console.log('start')
-
-    const browser = await puppeteer.launch({ headless: false })
-    const page = await browser.newPage()
-    await page.setViewport({ width: 1000, height: 800 })
-
-    /**
-     * BRAND CINEPOLIS
-     */
     const scrapperImpCinepolis = new ScrapperImpCinepolis(
       page,
+      flags.maxmovies,
       {
         nameBrand: 'Cinépolis',
         baseUrl: 'http://cinepolis.com',
@@ -53,29 +81,51 @@ const run = async () => {
     )
     await scrapperImpCinepolis.start()
 
-    scrapperImpCinepolis.itemsScrapped.forEach(item => {
-      console.log('--------> Next')
-      // console.log(util.inspect(nextObj, false, null, true /* enable colors */))
-      console.log(JSON.stringify(item))
-    })
-    /**
-     * BRAND CINEMEX
-     */
-
-    /* const brandImpCinemex = new BrandImpCinemex(
-      'http://cinemex.com',
-      'Cinemex',
-      page
+    logger.info('Results from cinepolis')
+    logger.info(
+      util.inspect(
+        scrapperImpCinepolis.itemsScrapped,
+        false,
+        null,
+        true /* enable colors */
+      )
     )
-    const scrapperImpCinemex = new ScrapperImpCinemex(brandImpCinemex, page)
-    await scrapperImpCinemex.start()
-
-    const nextObj2 = await scrapperImpCinemex.next()
-    console.log('--------> Next2', nextObj2)
-    */
-    await browser.close()
   } catch (e) {
-    console.log(e)
+    logger.info(`Fail something with 'cinepolisScrapper'`)
+    logger.info(e)
+
+    retries -= 1
+    if (retries <= 0) {
+      logger.info(`No more retries, throwing error...`)
+      throw Error(`No more retries for 'cinepolisScrapper'`)
+    } else {
+      logger.info(`One more time, retry remaining: ${retries}`)
+      return cinepolisScrapper()
+    }
+  }
+}
+
+const cinemexScrapper = async () => {}
+
+const run = async () => {
+  if (flags.cinepolis || flags.cinemex) {
+    try {
+      await preparePuppeteer()
+      if (flags.cinepolis) {
+        await cinepolisScrapper()
+      }
+      if (flags.cinemex) {
+        await cinemexScrapper()
+      }
+    } catch (e) {
+      logger.info(`Catch for end main run`)
+      logger.info(e)
+    } finally {
+      await closePuppeteer()
+      process.exit(0)
+    }
+  } else {
+    args.showHelp()
   }
 }
 

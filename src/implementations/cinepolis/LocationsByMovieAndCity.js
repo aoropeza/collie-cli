@@ -10,6 +10,29 @@ const logger = require('../../logger')(
 )
 
 class LocationsByMovieAndCity extends LocationsBy {
+  constructor(page, filter) {
+    super(page, filter)
+    this._selectorForActiveLocations =
+      '#cmbComplejo_chosen>ul.chosen-choices>li.search-choice'
+  }
+
+  async buildAllSelectedLocations() {
+    const allLocations = await this._page.$$eval(
+      this._selectorForActiveLocations,
+      liElements =>
+        liElements.map(item => {
+          // eslint-disable-next-line no-var
+          return {
+            name: item.querySelector('span').innerText,
+            index: item
+              .querySelector('a')
+              .getAttribute('data-option-array-index')
+          }
+        })
+    )
+    return allLocations.filter(item => Object.keys(item).length > 0)
+  }
+
   async scrapeLocations() {
     logger.info(`[Method] scrapeLocations`)
     logger.info(`Setting country: ${this._filter.city.key}`)
@@ -20,10 +43,7 @@ class LocationsByMovieAndCity extends LocationsBy {
         Config.waitForOptionsImmediately
       )
       await this._page.select('#cmbCiudadesHorario', this._filter.city.key)
-      await this._page.waitFor(1000)
-
-      const mainSelector =
-        '#cmbComplejo_chosen>ul.chosen-choices>li.search-choice'
+      await this._page.waitFor(5000)
 
       await this._page.waitFor(
         selector => {
@@ -31,23 +51,12 @@ class LocationsByMovieAndCity extends LocationsBy {
           return document.querySelectorAll(selector).length > 0
         },
         {},
-        mainSelector
+        this._selectorForActiveLocations
       )
 
-      const allLocations = await this._page.$$eval(mainSelector, liElements =>
-        liElements.map(item => {
-          // eslint-disable-next-line no-var
-          return {
-            name: item.querySelector('span').innerText,
-            index: item
-              .querySelector('a')
-              .getAttribute('data-option-array-index')
-          }
-        })
-      )
-      this._locations = allLocations.filter(
-        item => Object.keys(item).length > 0
-      )
+      this._locations = await this.buildAllSelectedLocations()
+      logger.info(`All locations count: ${this._locations.length}`)
+      logger.info(this._locations)
     } catch (e) {
       logger.error(`Movie don't have locations for this citie`)
     }
@@ -55,11 +64,18 @@ class LocationsByMovieAndCity extends LocationsBy {
 
   async unSelectLocations() {
     logger.info('[Method] unSelectLocations')
-    for (const location of this._locations) {
+
+    const currentSelectedlocations = await this.buildAllSelectedLocations()
+    logger.info(`Locations to unselected: ${currentSelectedlocations.length}`)
+
+    for (const location of currentSelectedlocations) {
       const selector = `#cmbComplejo_chosen>ul.chosen-choices>li.search-choice>a[data-option-array-index="${location.index}"]`
-      logger.info(`clicking ${selector}`)
       const button = await this._page.$(selector)
-      await button.click()
+      try {
+        await button.click()
+      } catch (e) {
+        logger.error(`button click error ${e}`)
+      }
     }
   }
 }

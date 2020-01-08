@@ -14,7 +14,6 @@ class LocationsBy {
   async startScrapper() {
     logger.info('[Method] startScrapper')
     await this.scrapeLocations()
-    await this.unSelectLocations()
   }
 
   async scrapeLocations() {

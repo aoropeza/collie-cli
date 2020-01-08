@@ -36,7 +36,6 @@ class Brand {
 
   get json() {
     return {
-      cities: this._cities,
       name: this._name,
       logo: this._logo
     }

@@ -7,11 +7,13 @@
     "format": "prettier --write \"**/*.{js,json,md,yaml}\"",
     "format:check": "prettier --check \"**/*.{js,json,md,yaml}\"",
     "lint": "npm run format:check && eslint .",
-    "test": "jest --forceExit"
+    "test": "jest --forceExit",
+    "start": "DEBUG=collie:cli* node index"
   },
   "author": "Alejandro Oropeza",
   "license": "MIT",
   "dependencies": {
+    "args": "^5.0.1",
     "bluebird": "^3.7.2",
     "debug": "^4.1.1",
     "lodash": "^4.17.15",

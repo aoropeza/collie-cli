@@ -11,6 +11,7 @@ const logger = require('../../logger')(
 class SchedulesByMovieCityAndLocation extends SchedulesBy {
   async startScrapper() {
     logger.info('[Method] startScrapper')
+    logger.info(`Scrapping times from: ${this._filter.selectedLocation.name}`)
     await this._page.click(
       `#cmbComplejo_chosen ul.chosen-choices>li.search-field>input`,
       { clickCount: 3 }
@@ -27,12 +28,16 @@ class SchedulesByMovieCityAndLocation extends SchedulesBy {
     const button = await this._page.$(selector)
     await button.click()
 
-    logger.info(selector)
     await this._page.select('#cmbFechas', this._filter.date)
 
     /**
      * Scrapping: Getting times
      */
+    const duration = await this._page.$eval(
+      '#ContentPlaceHolder1_ctl_sinopsis_ctl_duracion',
+      el => el.innerText
+    )
+
     const timesHandles = await this._page.$$(
       'div.location:not(.locationHide) time>a'
     )
@@ -44,9 +49,13 @@ class SchedulesByMovieCityAndLocation extends SchedulesBy {
       }, item)
     )
     const times = await Promise.all(promisesToScrappedTimes)
-    logger.info('times: ')
-    logger.info(times)
-    return times
+    logger.info(`Times found: ${times.length}`)
+    return times.map(item => {
+      return {
+        ...item,
+        duration
+      }
+    })
   }
 }
 module.exports = { SchedulesByMovieCityAndLocation }

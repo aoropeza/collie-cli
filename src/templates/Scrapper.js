@@ -9,6 +9,7 @@ const logger = require('../logger')('collie:cli:Template:Scrapper')
 class Scrapper extends Array {
   constructor(
     page,
+    maxmovies,
     { nameBrand, baseUrl, dateToFilter },
     BrandImpClass,
     MoviesByCityImpClass,
@@ -19,6 +20,7 @@ class Scrapper extends Array {
     super()
     this._baseUrl = baseUrl
     this._page = page
+    this._maxmovies = maxmovies
     this._dateToFilter = dateToFilter
     this.lastKeyUrl = ''
 
@@ -39,31 +41,33 @@ class Scrapper extends Array {
   async start() {
     logger.info('[Method] start')
     await this._page.goto(this._baseUrl, Config.gotoOptions)
-    /**
-     * Getting all CITIES in this._brand.cities
-     */
+
     await this._brand.startScrapper()
 
     this._movies = await this.gettingAllMovies()
-    this._movies = this._movies.slice(18, 19)
-    logger.info('All movies')
-    logger.info(this._movies)
+    if (this._maxmovies) {
+      this._movies = this._movies.slice(0, this._maxmovies)
+    }
 
     this._moviesByCityMerged = await this.mergeMoviesByCountry()
-    logger.info('All moviesByCityMerged')
-    logger.info(this._moviesByCityMerged)
+    logger.info(`MoviesByCityMerged count: ${this._moviesByCityMerged.length}`)
 
     for (const movieByCountry of this._moviesByCityMerged) {
       await this.goOrNotGo(movieByCountry.movie.anchorSchedule)
 
-      const locationsByMovieAndCity = await this.locationsByMovieAndCity(
-        movieByCountry
+      const locationsByMovieAndCity = new this._LocationsByMovieAndCityImpClass(
+        this._page,
+        {
+          movie: movieByCountry.movie,
+          city: movieByCountry.city
+        }
       )
+      await locationsByMovieAndCity.startScrapper()
       this._locations.push(locationsByMovieAndCity)
 
       for (const location of locationsByMovieAndCity.locations) {
-        logger.info(`-> Movie: ${locationsByMovieAndCity.filter.movie.name}`)
-        logger.info(`-> Location: ${location.name}`)
+        await locationsByMovieAndCity.unSelectLocations()
+
         const scheduleByMovieCityAndLocation = new this._SchedulesByMovieCityAndLocationImpClass(
           this._page,
           {
@@ -83,7 +87,7 @@ class Scrapper extends Array {
     if (this.lastKeyUrl !== newUrlKey) {
       this.lastKeyUrl = newUrlKey
       const gotoUrl = `${this._baseUrl}/${this.lastKeyUrl}`
-      logger.info(`gotoUrl: ${gotoUrl}`)
+      logger.info(`Goto: ${gotoUrl}`)
       await this._page.goto(gotoUrl, Config.gotoOptions)
     }
   }
@@ -118,27 +122,25 @@ class Scrapper extends Array {
     return moviesByCity
   }
 
-  async locationsByMovieAndCity(movieByCountry) {
-    logger.info('[Method] locationsByMovieAndCity')
-    const locationsByMovieAndCity = new this._LocationsByMovieAndCityImpClass(
-      this._page,
-      {
-        movie: movieByCountry.movie,
-        city: movieByCountry.city
-      }
-    )
-    await locationsByMovieAndCity.startScrapper()
-    logger.info(
-      `Count locationsByMovieAndCity.locations.length: ${locationsByMovieAndCity.locations.length}`
-    )
-    return locationsByMovieAndCity
-  }
-
   // eslint-disable-next-line class-methods-use-this
   get itemsScrapped() {
-    return this._locations.map(item => {
-      return { filter: item.filter, locations: item.locations }
-    })
+    return this._flattenDepth(
+      this._locations.map(element => {
+        return element.locations.map(item => {
+          return {
+            brand: this._brand.json,
+            movie: {
+              name: element.filter.movie.name,
+              cover: element.filter.movie.cover
+            },
+            location: {
+              name: item.name
+            },
+            schedules: item.times
+          }
+        })
+      })
+    )
   }
 }
 

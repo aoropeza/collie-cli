@@ -1,16 +1,20 @@
 'use strict'
 
+const args = require('args')
+
 class Config {
   static get gotoOptions() {
+    const flags = args.parse(process.argv)
     return {
-      timeout: 60000,
+      timeout: flags.timeoutpage,
       waitUntil: 'networkidle2'
     }
   }
 
   static get waitForOptions() {
+    const flags = args.parse(process.argv)
     return {
-      timeout: 60
+      timeout: flags.timeoutobject
     }
   }
 
