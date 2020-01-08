@@ -6,7 +6,7 @@
 const { Config } = require('../config')
 const logger = require('../logger')('collie:cli:Template:Scrapper')
 
-class Scrapper {
+class Scrapper extends Array {
   constructor(
     page,
     { nameBrand, baseUrl, dateToFilter },
@@ -16,6 +16,7 @@ class Scrapper {
     SchedulesByMovieCityAndLocationImpClass,
     { uniqBy, flattenDepth }
   ) {
+    super()
     this._baseUrl = baseUrl
     this._page = page
     this._dateToFilter = dateToFilter
@@ -36,6 +37,7 @@ class Scrapper {
   }
 
   async start() {
+    logger.info('[Method] start')
     await this._page.goto(this._baseUrl, Config.gotoOptions)
     /**
      * Getting all CITIES in this._brand.cities
@@ -44,32 +46,24 @@ class Scrapper {
 
     this._movies = await this.gettingAllMovies()
     this._movies = this._movies.slice(18, 19)
-    logger.info('==========')
+    logger.info('All movies')
     logger.info(this._movies)
 
     this._moviesByCityMerged = await this.mergeMoviesByCountry()
+    logger.info('All moviesByCityMerged')
+    logger.info(this._moviesByCityMerged)
 
     for (const movieByCountry of this._moviesByCityMerged) {
       await this.goOrNotGo(movieByCountry.movie.anchorSchedule)
 
-      const locationsByMovieAndCity = new this._LocationsByMovieAndCityImpClass(
-        this._page,
-        {
-          movie: movieByCountry.movie,
-          city: movieByCountry.city
-        }
+      const locationsByMovieAndCity = await this.locationsByMovieAndCity(
+        movieByCountry
       )
-      await locationsByMovieAndCity.startScrapper()
       this._locations.push(locationsByMovieAndCity)
-      logger.info(
-        `locationsByMovieAndCity.locations: `,
-        locationsByMovieAndCity.locations.length
-      )
 
       for (const location of locationsByMovieAndCity.locations) {
-        logger.info(
-          `movie: ${locationsByMovieAndCity.filter.movie.name}, location: ${location.name}`
-        )
+        logger.info(`-> Movie: ${locationsByMovieAndCity.filter.movie.name}`)
+        logger.info(`-> Location: ${location.name}`)
         const scheduleByMovieCityAndLocation = new this._SchedulesByMovieCityAndLocationImpClass(
           this._page,
           {
@@ -78,12 +72,14 @@ class Scrapper {
             date: this._dateToFilter
           }
         )
-        await scheduleByMovieCityAndLocation.startScrapper()
+        const times = await scheduleByMovieCityAndLocation.startScrapper()
+        location.times = times
       }
     }
   }
 
   async goOrNotGo(newUrlKey) {
+    logger.info('[Method] goOrNotGo')
     if (this.lastKeyUrl !== newUrlKey) {
       this.lastKeyUrl = newUrlKey
       const gotoUrl = `${this._baseUrl}/${this.lastKeyUrl}`
@@ -93,6 +89,7 @@ class Scrapper {
   }
 
   async gettingAllMovies() {
+    logger.info('[Method] gettingAllMovies')
     let movies = []
     for (const item of this._brand.cities) {
       const moviesByCountry = new this._MoviesByCityImpClass(this._page, item)
@@ -111,6 +108,7 @@ class Scrapper {
   }
 
   async mergeMoviesByCountry() {
+    logger.info('[Method] mergeMoviesByCountry')
     const moviesByCity = []
     for (const movie of this._movies) {
       for (const city of this._brand.cities) {
@@ -120,18 +118,27 @@ class Scrapper {
     return moviesByCity
   }
 
+  async locationsByMovieAndCity(movieByCountry) {
+    logger.info('[Method] locationsByMovieAndCity')
+    const locationsByMovieAndCity = new this._LocationsByMovieAndCityImpClass(
+      this._page,
+      {
+        movie: movieByCountry.movie,
+        city: movieByCountry.city
+      }
+    )
+    await locationsByMovieAndCity.startScrapper()
+    logger.info(
+      `Count locationsByMovieAndCity.locations.length: ${locationsByMovieAndCity.locations.length}`
+    )
+    return locationsByMovieAndCity
+  }
+
   // eslint-disable-next-line class-methods-use-this
-  next() {
-    return {
-      brand: this._brand.json,
-      /*movies: this._uniqBy(
-        this._flattenDepth(this._movies.map(item => item.movies)),
-        'name'
-      ),*/
-      locations: this._locations.map(item => {
-        return { filter: item.filter, locations: item.locations }
-      })
-    }
+  get itemsScrapped() {
+    return this._locations.map(item => {
+      return { filter: item.filter, locations: item.locations }
+    })
   }
 }
 

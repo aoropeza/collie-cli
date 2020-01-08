@@ -6,11 +6,12 @@
 const { LocationsBy } = require('../../templates/LocationsBy')
 const { Config } = require('../../config')
 const logger = require('../../logger')(
-  'collie:cli:Template:Cinepolis:LocationsByMovieAndCity'
+  'collie:cli:Imp:Cinepolis:LocationsByMovieAndCity'
 )
 
 class LocationsByMovieAndCity extends LocationsBy {
   async scrapeLocations() {
+    logger.info(`[Method] scrapeLocations`)
     logger.info(`Setting country: ${this._filter.city.key}`)
 
     try {
@@ -52,11 +53,11 @@ class LocationsByMovieAndCity extends LocationsBy {
     }
   }
 
-  async unSelectLocation() {
-    logger.info('unSelectLocation')
+  async unSelectLocations() {
+    logger.info('[Method] unSelectLocations')
     for (const location of this._locations) {
       const selector = `#cmbComplejo_chosen>ul.chosen-choices>li.search-choice>a[data-option-array-index="${location.index}"]`
-      logger.info(selector)
+      logger.info(`clicking ${selector}`)
       const button = await this._page.$(selector)
       await button.click()
     }

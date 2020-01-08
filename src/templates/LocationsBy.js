@@ -12,18 +12,18 @@ class LocationsBy {
   }
 
   async startScrapper() {
-    logger.info('startScrapper')
+    logger.info('[Method] startScrapper')
     await this.scrapeLocations()
-    await this.unSelectLocation()
+    await this.unSelectLocations()
   }
 
   async scrapeLocations() {
-    logger.info('scrapeLocations')
+    logger.info('[Method] scrapeLocations')
     throw new Error('Please implement this in inheritors')
   }
 
-  async unSelectLocation() {
-    logger.info('unSelectLocation')
+  async unSelectLocations() {
+    logger.info('[Method] unSelectLocations')
     throw new Error('Please implement this in inheritors')
   }
 

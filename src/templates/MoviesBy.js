@@ -12,7 +12,7 @@ class MoviesBy {
   }
 
   async startScrapper() {
-    logger.info('startScrapper')
+    logger.info('[Method] startScrapper')
     throw new Error('Please implement this in inheritors')
   }
 

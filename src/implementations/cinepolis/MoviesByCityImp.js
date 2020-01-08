@@ -2,12 +2,12 @@
 
 const { MoviesBy } = require('../../templates/MoviesBy')
 const logger = require('../../logger')(
-  'collie:cli:Template:Cinepolis:MoviesByCityImp'
+  'collie:cli:Imp:Cinepolis:MoviesByCityImp'
 )
 
 class MoviesByCityImp extends MoviesBy {
   async startScrapper() {
-    logger.info('startScrapper')
+    logger.info('[Method] startScrapper')
     const mainSelector = 'ul.listCartelera>li'
 
     await this._page.select('#cmbCiudadesCartelera', this._filter.id)

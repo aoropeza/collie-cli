@@ -2,17 +2,17 @@
 
 const { Brand } = require('../../templates/Brand')
 const { Config } = require('../../config')
-const logger = require('../../logger')('collie:cli:Template:Cinepolis:BrandImp')
+const logger = require('../../logger')('collie:cli:Imp:Cinepolis:BrandImp')
 
 class BrandImp extends Brand {
   async scrapeLogo() {
-    logger.info('scrapeLogo')
+    logger.info('[Method] scrapeLogo')
     await this._page.waitForSelector('#img_logomaster', Config.waitForOptions)
     this._logo = await this._page.$eval('#img_logomaster', el => el.src)
   }
 
   async scrapeCities() {
-    logger.info('scrapeCities')
+    logger.info('[Method] scrapeCities')
     await this._page.waitForSelector('#cmbCiudades', Config.waitForOptions)
     const allCities = await this._page.$$eval('#cmbCiudades>option', options =>
       options.map(items => {

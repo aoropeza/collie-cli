@@ -53,14 +53,16 @@ const run = async () => {
     )
     await scrapperImpCinepolis.start()
 
-    const nextObj = await scrapperImpCinepolis.next()
-    console.log('--------> Next')
-    console.log(util.inspect(nextObj, false, null, true /* enable colors */))
-
+    scrapperImpCinepolis.itemsScrapped.forEach(item => {
+      console.log('--------> Next')
+      // console.log(util.inspect(nextObj, false, null, true /* enable colors */))
+      console.log(JSON.stringify(item))
+    })
     /**
      * BRAND CINEMEX
      */
-    /*const brandImpCinemex = new BrandImpCinemex(
+
+    /* const brandImpCinemex = new BrandImpCinemex(
       'http://cinemex.com',
       'Cinemex',
       page

@@ -15,18 +15,18 @@ class Brand {
   }
 
   async startScrapper() {
-    logger.info('startScrapper')
+    logger.info('[Method] startScrapper')
     await this.scrapeLogo()
     await this.scrapeCities()
   }
 
   async scrapeLogo() {
-    logger.info('scrapeLogo')
+    logger.info('[Method] scrapeLogo')
     throw new Error('Please implement this in inheritors')
   }
 
   async scrapeCities() {
-    logger.info('scrapeCities')
+    logger.info('[Method] scrapeCities')
     throw new Error('Please implement this in inheritors')
   }
 

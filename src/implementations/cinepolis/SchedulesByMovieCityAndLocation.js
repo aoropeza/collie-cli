@@ -5,12 +5,12 @@
 
 const { SchedulesBy } = require('../../templates/SchedulesBy')
 const logger = require('../../logger')(
-  'collie:cli:Template:Cinepolis:SchedulesByMovieCityAndLocation'
+  'collie:cli:Imp:Cinepolis:SchedulesByMovieCityAndLocation'
 )
 
 class SchedulesByMovieCityAndLocation extends SchedulesBy {
   async startScrapper() {
-    logger.info('startScrapper')
+    logger.info('[Method] startScrapper')
     await this._page.click(
       `#cmbComplejo_chosen ul.chosen-choices>li.search-field>input`,
       { clickCount: 3 }
@@ -46,6 +46,7 @@ class SchedulesByMovieCityAndLocation extends SchedulesBy {
     const times = await Promise.all(promisesToScrappedTimes)
     logger.info('times: ')
     logger.info(times)
+    return times
   }
 }
 module.exports = { SchedulesByMovieCityAndLocation }
