@@ -3,6 +3,8 @@
 
 'use strict'
 
+const { UsesCases } = require('collie-uses-cases')
+
 const { Config } = require('../config')
 const logger = require('../logger')('collie:cli:Template:Scrapper')
 
@@ -10,7 +12,7 @@ class Scrapper extends Array {
   constructor(
     page,
     maxmovies,
-    { nameBrand, baseUrl, dateToFilter },
+    { nameBrand, baseUrl, momentToFilter },
     BrandImpClass,
     MoviesByCityImpClass,
     LocationsByMovieAndCityImpClass,
@@ -21,7 +23,7 @@ class Scrapper extends Array {
     this._baseUrl = baseUrl
     this._page = page
     this._maxmovies = maxmovies
-    this._dateToFilter = dateToFilter
+    this._momentToFilter = momentToFilter
     this.lastKeyUrl = ''
 
     this._brand = new BrandImpClass(nameBrand, this._page)
@@ -39,7 +41,7 @@ class Scrapper extends Array {
   }
 
   async start() {
-    logger.info('[Method] start')
+    logger.info(`[Method] start for: ${this._momentToFilter}`)
     await this._page.goto(this._baseUrl, Config.gotoOptions)
 
     await this._brand.startScrapper()
@@ -73,13 +75,17 @@ class Scrapper extends Array {
           {
             selectedLocation: location,
             allLocations: locationsByMovieAndCity.locations,
-            date: this._dateToFilter
+            date: this._momentToFilter
           }
         )
         const times = await scheduleByMovieCityAndLocation.startScrapper()
         location.times = times
       }
     }
+
+    await this.saveItemsScrapped()
+
+    logger.info('End scrapping.')
   }
 
   async goOrNotGo(newUrlKey) {
@@ -122,6 +128,31 @@ class Scrapper extends Array {
     return moviesByCity
   }
 
+  async saveItemsScrapped() {
+    const config = {
+      uriConnection: {
+        protocol: `mongodb+srv`,
+        database: process.env.DB_NAME,
+        user: process.env.DB_USER,
+        password: process.env.DB_PWD,
+        host: process.env.DB_HOST
+      }
+    }
+
+    const usesCases = await UsesCases.buildStatic(config)
+    const items = this.itemsScrapped.map(item =>
+      usesCases.bulkSchedules(
+        item.brand,
+        item.location,
+        item.movie,
+        item.schedules
+      )
+    )
+
+    logger.info('Saving items scrapped')
+    await Promise.all(items)
+  }
+
   // eslint-disable-next-line class-methods-use-this
   get itemsScrapped() {
     return this._flattenDepth(
@@ -134,7 +165,10 @@ class Scrapper extends Array {
               cover: element.filter.movie.cover
             },
             location: {
-              name: item.name
+              name: item.name,
+              latitude: 19.449582,
+              longitude: -99.0723182,
+              address: 'xxx'
             },
             schedules: item.times
           }

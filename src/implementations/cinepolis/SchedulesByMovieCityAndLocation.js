@@ -3,6 +3,8 @@
 
 'use strict'
 
+const moment = require('moment')
+
 const { SchedulesBy } = require('../../templates/SchedulesBy')
 const logger = require('../../logger')(
   'collie:cli:Imp:Cinepolis:SchedulesByMovieCityAndLocation'
@@ -28,7 +30,7 @@ class SchedulesByMovieCityAndLocation extends SchedulesBy {
     const button = await this._page.$(selector)
     await button.click()
 
-    await this._page.select('#cmbFechas', this._filter.date)
+    await this._page.select('#cmbFechas', this._filter.date.format('DD MMMM'))
 
     /**
      * Scrapping: Getting times
@@ -52,8 +54,12 @@ class SchedulesByMovieCityAndLocation extends SchedulesBy {
     logger.info(`Times found: ${times.length}`)
     return times.map(item => {
       return {
-        ...item,
-        duration
+        startTime: moment(
+          `${this._filter.date.format('YYYY-MM-DD')} ${item.time}`,
+          'YYYY-MM-DD H:mm'
+        ).utcOffset(0),
+        duration,
+        typeRoom: 'kids'
       }
     })
   }

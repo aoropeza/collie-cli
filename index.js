@@ -1,9 +1,10 @@
 'use strict'
 
-const util = require('util')
+require('dotenv').config()
 
 const args = require('args')
 const puppeteer = require('puppeteer')
+const moment = require('moment')
 const { uniqBy, flattenDepth } = require('lodash')
 
 const logger = require('./src/logger')('collie:cli:Main:index')
@@ -37,9 +38,10 @@ args
   )
   .option(
     ['o', 'timeoutobject'],
-    'Max timeout in milliseconds to wait a object.',
+    'Max timeout in milliseconds to wait an object.',
     60
   )
+  .option(['d', 'days'], 'How many day in the future(1 means tomorrow)', 1)
   .option(['c', 'cinepolis'], 'Run script for this specific brand.')
   .option(['x', 'cinemex'], 'Run script for this specific brand.')
   .option(
@@ -62,7 +64,6 @@ const preparePuppeteer = async () => {
 const closePuppeteer = async () => {
   await browser.close()
 }
-
 const cinepolisScrapper = async () => {
   try {
     const scrapperImpCinepolis = new ScrapperImpCinepolis(
@@ -71,7 +72,9 @@ const cinepolisScrapper = async () => {
       {
         nameBrand: 'Cinépolis',
         baseUrl: 'http://cinepolis.com',
-        dateToFilter: '08 enero'
+        momentToFilter: moment()
+          .locale('es')
+          .add(flags.days, 'days')
       },
       BrandImpCinepolis,
       MoviesByCityImpCinepolis,
@@ -80,16 +83,8 @@ const cinepolisScrapper = async () => {
       { uniqBy, flattenDepth }
     )
     await scrapperImpCinepolis.start()
-
     logger.info('Results from cinepolis')
-    logger.info(
-      util.inspect(
-        scrapperImpCinepolis.itemsScrapped,
-        false,
-        null,
-        true /* enable colors */
-      )
-    )
+    logger.info(JSON.stringify(scrapperImpCinepolis.itemsScrapped))
   } catch (e) {
     logger.info(`Fail something with 'cinepolisScrapper'`)
     logger.info(e)
