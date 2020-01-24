@@ -23,12 +23,14 @@ const {
 const {
   SchedulesByMovieCityAndLocation: SchedulesByMovieCityAndLocationImpCinepolis
 } = require('./src/implementations/cinepolis/SchedulesByMovieCityAndLocation')
+/*
 const {
   ScrapperImp: ScrapperImpCinemex
 } = require('./src/implementations/cinemex/ScrapperImp')
 const {
   BrandImp: BrandImpCinemex
 } = require('./src/implementations/cinemex/BrandImp')
+*/
 
 args
   .option(
@@ -64,6 +66,7 @@ const preparePuppeteer = async () => {
 const closePuppeteer = async () => {
   await browser.close()
 }
+// eslint-disable-next-line consistent-return
 const cinepolisScrapper = async () => {
   try {
     const scrapperImpCinepolis = new ScrapperImpCinepolis(
@@ -93,10 +96,9 @@ const cinepolisScrapper = async () => {
     if (retries <= 0) {
       logger.info(`No more retries, throwing error...`)
       throw Error(`No more retries for 'cinepolisScrapper'`)
-    } else {
-      logger.info(`One more time, retry remaining: ${retries}`)
-      return cinepolisScrapper()
     }
+    logger.info(`One more time, retry remaining: ${retries}`)
+    return cinepolisScrapper()
   }
 }
 
