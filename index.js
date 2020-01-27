@@ -47,6 +47,10 @@ args
   .option(['c', 'cinepolis'], 'Run script for this specific brand.')
   .option(['x', 'cinemex'], 'Run script for this specific brand.')
   .option(
+    ['k', 'dockerenv'],
+    'With this flag on this scrip will run in docker mode'
+  )
+  .option(
     'maxmovies',
     'Max number of movies to scrapped. Default all movies found.'
   )
@@ -58,7 +62,17 @@ let page
 let retries = flags.retry
 
 const preparePuppeteer = async () => {
-  browser = await puppeteer.launch({ headless: false })
+  const options = {
+    headless: true,
+    ...(flags.dockerenv
+      ? {
+          executablePath: '/usr/bin/chromium-browser',
+          args: ['--disable-dev-shm-usage']
+        }
+      : {})
+  }
+
+  browser = await puppeteer.launch(options)
   page = await browser.newPage()
   await page.setViewport({ width: 1000, height: 800 })
 }
