@@ -67,7 +67,7 @@ const preparePuppeteer = async () => {
     ...(flags.dockerenv
       ? {
           executablePath: '/usr/bin/chromium-browser',
-          args: ['--disable-dev-shm-usage']
+          args: ['--disable-setuid-sandbox', '--no-sandbox']
         }
       : {})
   }
