@@ -4,7 +4,7 @@
   "description": "CLI for collie",
   "main": "index.js",
   "scripts": {
-    "current-version": "echo $npm_package_version",
+    "current-version": "jq -r '.version' package.json",
     "format": "prettier --write \"**/*.{js,json,md,yaml}\"",
     "format:check": "prettier --check \"**/*.{js,json,md,yaml}\"",
     "lint": "npm run format:check && eslint .",
