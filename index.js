@@ -141,3 +141,12 @@ const run = async () => {
 }
 
 run()
+
+function handleFatalError(err) {
+  logger.fatal(`${'[fatal error]'} ${err.message}`)
+  logger.fatal(err.stack)
+  process.exit(1)
+}
+
+process.on('uncaughtException', handleFatalError)
+process.on('unhandledRejection', handleFatalError)
