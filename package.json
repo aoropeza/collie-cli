@@ -1,6 +1,6 @@
 {
   "name": "collie-cli",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "CLI for collie",
   "main": "index.js",
   "scripts": {
@@ -14,6 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "args": "^5.0.1",
+    "aws-sdk": "^2.616.0",
     "bluebird": "^3.7.2",
     "collie-uses-cases": "git+https://github.com/aoropeza/collie-uses-cases.git#develop",
     "debug": "^4.1.1",

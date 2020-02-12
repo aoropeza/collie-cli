@@ -7,6 +7,7 @@ const puppeteer = require('puppeteer')
 const moment = require('moment')
 const { uniqBy, flattenDepth } = require('lodash')
 
+const { Notifications } = require('./src/lib/Notifications')
 const logger = require('./src/logger')('collie:cli:Main:index')
 const {
   ScrapperImp: ScrapperImpCinepolis
@@ -128,9 +129,16 @@ const run = async () => {
       if (flags.cinemex) {
         await cinemexScrapper()
       }
-    } catch (e) {
+
+      await Notifications.publish(`Collie CLI SUCCESS`, `All was fine`)
+    } catch (err) {
       logger.info(`Catch for end main run`)
-      logger.info(e)
+      logger.info(err)
+
+      await Notifications.publish(
+        `Collie CLI Exception`,
+        `Catch for end main run: ${JSON.stringify(err)}`
+      )
     } finally {
       await closePuppeteer()
       process.exit(0)
@@ -142,7 +150,13 @@ const run = async () => {
 
 run()
 
-function handleFatalError(err) {
+const handleFatalError = async err => {
+  await Notifications.publish(
+    `Collie CLI FATAL ERROR`,
+    `Catch for end main run: ${JSON.stringify(err)}`,
+    'arn:aws:sns:us-east-1:675002411007:CollieCli-NotificationsWorker'
+  )
+
   logger.fatal(`${'[fatal error]'} ${err.message}`)
   logger.fatal(err.stack)
   process.exit(1)

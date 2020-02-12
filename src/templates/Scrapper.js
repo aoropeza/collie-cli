@@ -7,6 +7,7 @@ const { UsesCases } = require('collie-uses-cases')
 
 const { Config } = require('../config')
 const logger = require('../logger')('collie:cli:Template:Scrapper')
+const { Notifications } = require('../lib/Notifications')
 
 class Scrapper extends Array {
   constructor(
@@ -42,6 +43,12 @@ class Scrapper extends Array {
 
   async start() {
     logger.info(`[Method] start for: ${this._momentToFilter}`)
+
+    Notifications.publish(
+      'Collie CLI Starting',
+      `[Method] start for: ${this._momentToFilter}`
+    )
+
     await this._page.goto(this._baseUrl, Config.gotoOptions)
 
     await this._brand.startScrapper()
