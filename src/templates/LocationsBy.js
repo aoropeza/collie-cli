@@ -2,7 +2,9 @@
 
 'use strict'
 
-const logger = require('../logger')('collie:cli:Template:LocationsBy')
+const Logger = require('../logger')
+
+const logger = new Logger('collie:cli:Template:LocationsBy')
 
 class LocationsBy {
   constructor(page, filter) {

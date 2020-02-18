@@ -2,7 +2,9 @@
 
 'use strict'
 
-const logger = require('../logger')('collie:cli:Template:MoviesBy')
+const Logger = require('../logger')
+
+const logger = new Logger('collie:cli:Template:MoviesBy')
 
 class MoviesBy {
   constructor(page, filter) {

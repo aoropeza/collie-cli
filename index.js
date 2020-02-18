@@ -8,7 +8,6 @@ const moment = require('moment')
 const { uniqBy, flattenDepth } = require('lodash')
 
 const { Notifications } = require('./src/lib/Notifications')
-const logger = require('./src/logger')('collie:cli:Main:index')
 const {
   ScrapperImp: ScrapperImpCinepolis
 } = require('./src/implementations/cinepolis/ScrapperImp')
@@ -24,6 +23,9 @@ const {
 const {
   SchedulesByMovieCityAndLocation: SchedulesByMovieCityAndLocationImpCinepolis
 } = require('./src/implementations/cinepolis/SchedulesByMovieCityAndLocation')
+const Logger = require('./src/logger')
+
+const logger = new Logger('collie:cli:Main:index')
 /*
 const {
   ScrapperImp: ScrapperImpCinemex

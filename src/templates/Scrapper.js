@@ -6,8 +6,10 @@
 const { UsesCases } = require('collie-uses-cases')
 
 const { Config } = require('../config')
-const logger = require('../logger')('collie:cli:Template:Scrapper')
 const { Notifications } = require('../lib/Notifications')
+const Logger = require('../logger')
+
+const logger = new Logger('collie:cli:Template:Scrapper')
 
 class Scrapper extends Array {
   constructor(

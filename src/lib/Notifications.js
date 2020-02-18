@@ -2,7 +2,9 @@
 
 const AWS = require('aws-sdk')
 
-const logger = require('../logger')('collie:cli:Notifications')
+const Logger = require('../logger')
+
+const logger = new Logger('collie:cli:Notifications')
 
 AWS.config.update({ region: 'us-east-1' })
 const sns = new AWS.SNS()
@@ -32,9 +34,9 @@ class Notifications {
 
     try {
       const result = await sns.publish(params).promise()
-      logger.info(`Notification sent succesfully: ${JSON.stringify(result)}`)
+      logger.info(result)
     } catch (error) {
-      logger.error(`Notification error: ${JSON.stringify(error)}`)
+      logger.error(error.stack)
     }
   }
 

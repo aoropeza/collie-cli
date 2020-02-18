@@ -5,9 +5,9 @@
 
 const { LocationsBy } = require('../../templates/LocationsBy')
 const { Config } = require('../../config')
-const logger = require('../../logger')(
-  'collie:cli:Imp:Cinepolis:LocationsByMovieAndCity'
-)
+const Logger = require('../../logger')
+
+const logger = new Logger('collie:cli:Imp:Cinepolis:LocationsByMovieAndCity')
 
 class LocationsByMovieAndCity extends LocationsBy {
   constructor(page, filter) {

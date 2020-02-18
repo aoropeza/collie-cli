@@ -2,7 +2,9 @@
 
 'use strict'
 
-const logger = require('../logger')('collie:cli:Template:Brand')
+const Logger = require('../logger')
+
+const logger = new Logger('collie:cli:Template:Brand')
 
 class Brand {
   constructor(name, page) {

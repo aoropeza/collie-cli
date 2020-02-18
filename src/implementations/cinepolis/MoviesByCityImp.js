@@ -1,9 +1,9 @@
 'use strict'
 
 const { MoviesBy } = require('../../templates/MoviesBy')
-const logger = require('../../logger')(
-  'collie:cli:Imp:Cinepolis:MoviesByCityImp'
-)
+const Logger = require('../../logger')
+
+const logger = new Logger('collie:cli:Imp:Cinepolis:MoviesByCityImp')
 
 class MoviesByCityImp extends MoviesBy {
   async startScrapper() {

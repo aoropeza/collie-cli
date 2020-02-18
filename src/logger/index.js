@@ -1,24 +1,50 @@
 'use strict'
 
-const debug = require('debug')
+const chalk = require('chalk')
+const { createLogger, format, transports } = require('winston')
 
-const logger = nameSpace => {
-  const dInstance = debug(nameSpace)
-  const debugEnabled = dInstance.enabled
-  const debugPrint = (msg, level) => dInstance(`${level}: %O`, msg)
+const { timestamp, prettyPrint, combine } = format
 
-  return {
-    info: msg =>
-      debugEnabled ? debugPrint(msg, 'INFO') : console.log({ info: msg }),
-    debug: msg =>
-      debugEnabled ? debugPrint(msg, 'DEBUG') : console.debug({ info: msg }),
-    warn: msg =>
-      debugEnabled ? debugPrint(msg, 'WARN') : console.war({ info: msg }),
-    error: msg =>
-      debugEnabled ? debugPrint(msg, 'ERROR') : console.error(msg),
-    fatal: msg =>
-      debugEnabled ? debugPrint(msg, 'FATAL') : console.fatal({ info: msg })
+class Logger {
+  constructor(nameSpace) {
+    this._nameSpace = nameSpace
+    this._pathLog = `./logs/${nameSpace}.log`
+
+    const formatInfo = ({ level, ...infoTmp }) => {
+      const info = {
+        level,
+        route: this._nameSpace,
+        ...infoTmp
+      }
+      const toString = value =>
+        typeof value === 'string' || value instanceof String
+          ? `"${value}"`
+          : JSON.stringify(value)
+
+      return `{${Object.keys(info)
+        .map(key => `"${key}": ${toString(info[key])}`)
+        .join(', ')}}`
+    }
+
+    this._logger = createLogger({
+      transports: [
+        new transports.Console({
+          format: combine(format.printf(formatInfo))
+        }),
+        new transports.File({
+          filename: this._pathLog,
+          format: combine(timestamp(), prettyPrint())
+        })
+      ]
+    })
+  }
+
+  info(message) {
+    this._logger.log({
+      level: 'info',
+      route: chalk.cyan(this._nameSpace),
+      message
+    })
   }
 }
-
-module.exports = logger
+module.exports = Logger

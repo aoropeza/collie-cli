@@ -16,12 +16,13 @@
     "args": "^5.0.1",
     "aws-sdk": "^2.616.0",
     "bluebird": "^3.7.2",
+    "chalk": "^3.0.0",
     "collie-uses-cases": "git+https://github.com/aoropeza/collie-uses-cases.git#develop",
-    "debug": "^4.1.1",
     "dotenv": "^8.2.0",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
-    "puppeteer": "^2.0.0"
+    "puppeteer": "^2.0.0",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "eslint": "^6.7.1",

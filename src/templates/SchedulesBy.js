@@ -2,7 +2,9 @@
 
 'use strict'
 
-const logger = require('../logger')('collie:cli:Template:SchedulesBy')
+const Logger = require('../logger')
+
+const logger = new Logger('collie:cli:Template:SchedulesBy')
 
 class SchedulesBy {
   constructor(page, filter) {

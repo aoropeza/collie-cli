@@ -2,7 +2,9 @@
 
 const { Brand } = require('../../templates/Brand')
 const { Config } = require('../../config')
-const logger = require('../../logger')('collie:cli:Imp:Cinepolis:BrandImp')
+const Logger = require('../../logger')
+
+const logger = new Logger('collie:cli:Imp:Cinepolis:BrandImp')
 
 class BrandImp extends Brand {
   async scrapeLogo() {
