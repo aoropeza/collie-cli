@@ -5,7 +5,7 @@
 
 const { LocationsBy } = require('../../templates/LocationsBy')
 const { Config } = require('../../config')
-const Logger = require('../../logger')
+const { Logger } = require('../../logger')
 
 const logger = new Logger('collie:cli:Imp:Cinepolis:LocationsByMovieAndCity')
 

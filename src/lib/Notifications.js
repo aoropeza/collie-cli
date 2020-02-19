@@ -2,9 +2,11 @@
 
 const AWS = require('aws-sdk')
 
-const Logger = require('../logger')
+const { Logger } = require('../logger')
+const { Config } = require('../config')
 
-const logger = new Logger('collie:cli:Notifications')
+const logger = new Logger('collie:cli:Notifications', 0, [255, 128, 0])
+const config = new Config()
 
 AWS.config.update({ region: 'us-east-1' })
 const sns = new AWS.SNS()
@@ -40,12 +42,30 @@ class Notifications {
     }
   }
 
-  static async publish(subject, message) {
+  static async publishSuccess(message) {
     const noti = new Notifications()
     await noti
       .message(message)
-      .subject(subject)
-      .channel(process.env.CHANNEL)
+      .subject(`[${config.get('env')}] Collie Cli - Success`)
+      .channel(config.get('private.channel_notifications'))
+      .build()
+  }
+
+  static async publishError(message) {
+    const noti = new Notifications()
+    await noti
+      .message(message)
+      .subject(`[${config.get('env')}] Collie Cli - Error`)
+      .channel(config.get('private.channel_notifications'))
+      .build()
+  }
+
+  static async publish(message) {
+    const noti = new Notifications()
+    await noti
+      .message(message)
+      .subject(`[${config.get('env')}] Collie Cli`)
+      .channel(config.get('private.channel_notifications'))
       .build()
   }
 }

@@ -7,14 +7,15 @@ const { UsesCases } = require('collie-uses-cases')
 
 const { Config } = require('../config')
 const { Notifications } = require('../lib/Notifications')
-const Logger = require('../logger')
+const { Logger } = require('../logger')
 
-const logger = new Logger('collie:cli:Template:Scrapper')
+const logger = new Logger('collie:cli:Template:Scrapper', 1, [0, 153, 255])
+const config = new Config()
 
 class Scrapper extends Array {
   constructor(
     page,
-    maxmovies,
+    movieRestriction,
     { nameBrand, baseUrl, momentToFilter },
     BrandImpClass,
     MoviesByCityImpClass,
@@ -25,7 +26,7 @@ class Scrapper extends Array {
     super()
     this._baseUrl = baseUrl
     this._page = page
-    this._maxmovies = maxmovies
+    this._movieRestriction = movieRestriction
     this._momentToFilter = momentToFilter
     this.lastKeyUrl = ''
 
@@ -44,26 +45,17 @@ class Scrapper extends Array {
   }
 
   async start() {
-    logger.info(`[Method] start for: ${this._momentToFilter}`)
-
-    Notifications.publish(
-      'Collie CLI Starting',
-      `[Method] start for: ${this._momentToFilter}`
-    )
+    const log = `start() Starting. Getting info from: ${this._momentToFilter}`
+    logger.info(log)
+    await Notifications.publishSuccess(log)
 
     await this._page.goto(this._baseUrl, Config.gotoOptions)
 
     await this._brand.startScrapper()
 
     this._movies = await this.gettingAllMovies()
-    if (this._maxmovies) {
-      this._movies = this._movies.slice(0, this._maxmovies)
-    }
 
-    this._moviesByCityMerged = await this.mergeMoviesByCountry()
-    logger.info(`MoviesByCityMerged count: ${this._moviesByCityMerged.length}`)
-
-    for (const movieByCountry of this._moviesByCityMerged) {
+    /*for (const movieByCountry of this._moviesByCityMerged) {
       await this.goOrNotGo(movieByCountry.movie.anchorSchedule)
 
       const locationsByMovieAndCity = new this._LocationsByMovieAndCityImpClass(
@@ -92,63 +84,56 @@ class Scrapper extends Array {
       }
     }
 
-    await this.saveItemsScrapped()
-
-    logger.info('End scrapping.')
+    await this.saveItemsScrapped()*/
+    logger.info('End scrapping')
   }
 
   async goOrNotGo(newUrlKey) {
-    logger.info('[Method] goOrNotGo')
     if (this.lastKeyUrl !== newUrlKey) {
       this.lastKeyUrl = newUrlKey
       const gotoUrl = `${this._baseUrl}/${this.lastKeyUrl}`
-      logger.info(`Goto: ${gotoUrl}`)
+      logger.info(`(goOrNotGo) Going to ${gotoUrl}`)
       await this._page.goto(gotoUrl, Config.gotoOptions)
     }
   }
 
   async gettingAllMovies() {
-    logger.info('[Method] gettingAllMovies')
     let movies = []
     for (const item of this._brand.cities) {
       const moviesByCountry = new this._MoviesByCityImpClass(this._page, item)
       await moviesByCountry.startScrapper()
-      movies.push(moviesByCountry)
+      movies = movies.concat(moviesByCountry.movies)
     }
-    /**
-     * Zipping and Unique
-     */
-    movies = this._uniqBy(
-      this._flattenDepth(movies.map(item => item.movies)),
-      'name'
-    )
 
+    if (this._movieRestriction.enable) {
+      logger.info(
+        `MovieRestriction enable. Scrapping just for ${this._movieRestriction.name}`
+      )
+      movies = movies.filter(item =>
+        item.movie.name
+          .toLowerCase()
+          .includes(this._movieRestriction.name.toLowerCase().toLowerCase())
+      )
+    }
+
+    logger.info(
+      `gettingAllMovies() ${movies.length}  movies of ${this._brand.cities.length} cities`
+    )
     return movies
   }
 
-  async mergeMoviesByCountry() {
-    logger.info('[Method] mergeMoviesByCountry')
-    const moviesByCity = []
-    for (const movie of this._movies) {
-      for (const city of this._brand.cities) {
-        moviesByCity.push({ movie, city })
-      }
-    }
-    return moviesByCity
-  }
-
   async saveItemsScrapped() {
-    const config = {
+    const options = {
       uriConnection: {
         protocol: `mongodb+srv`,
-        database: process.env.DB_NAME,
-        user: process.env.DB_USER,
-        password: process.env.DB_PWD,
-        host: process.env.DB_HOST
+        database: config.get('db_name'),
+        user: config.get('db_user'),
+        password: config.get('db_pwd'),
+        host: config.get('db_host')
       }
     }
 
-    const usesCases = await UsesCases.buildStatic(config)
+    const usesCases = await UsesCases.buildStatic(options)
     const items = this.itemsScrapped.map(item =>
       usesCases.bulkSchedules(
         item.brand,
@@ -158,7 +143,7 @@ class Scrapper extends Array {
       )
     )
 
-    logger.info('Saving items scrapped')
+    logger.info('saveItemsScrapped() Saving scrapped items')
     await Promise.all(items)
   }
 

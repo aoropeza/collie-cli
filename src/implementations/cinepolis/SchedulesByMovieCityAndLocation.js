@@ -6,7 +6,7 @@
 const moment = require('moment')
 
 const { SchedulesBy } = require('../../templates/SchedulesBy')
-const Logger = require('../../logger')
+const { Logger } = require('../../logger')
 
 const logger = new Logger(
   'collie:cli:Imp:Cinepolis:SchedulesByMovieCityAndLocation'

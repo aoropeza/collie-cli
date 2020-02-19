@@ -2,9 +2,9 @@
 
 'use strict'
 
-const Logger = require('../logger')
+const { Logger } = require('../logger')
 
-const logger = new Logger('collie:cli:Template:Brand')
+const logger = new Logger('collie:cli:Template:Brand', 2, [102, 255, 102])
 
 class Brand {
   constructor(name, page) {
@@ -17,18 +17,18 @@ class Brand {
   }
 
   async startScrapper() {
-    logger.info('[Method] startScrapper')
+    logger.info('startScrapper()')
     await this.scrapeLogo()
     await this.scrapeCities()
   }
 
   async scrapeLogo() {
-    logger.info('[Method] scrapeLogo')
+    logger.info('scrapeLogo()')
     throw new Error('Please implement this in inheritors')
   }
 
   async scrapeCities() {
-    logger.info('[Method] scrapeCities')
+    logger.info('scrapeCities()')
     throw new Error('Please implement this in inheritors')
   }
 
