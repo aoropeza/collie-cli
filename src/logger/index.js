@@ -11,8 +11,8 @@ const config = new Config()
 class Logger {
   constructor(nameSpace, depth = 0, rgb = [255, 255, 255]) {
     this._nameSpace = nameSpace
-    this._pathNameSpaceLog = `${config.get('log_location')}/${nameSpace}.log`
     this._pathFullLog = `${config.get('log_location')}/full.log`
+    this._pathFullConsoleLog = `${config.get('log_location')}/full_console.log`
     this._debugAsDeveloper = config.get('debug_mode') === 'developer'
     this._depth = this._debugAsDeveloper ? '    '.repeat(depth) : ''
     this._colorize = this._debugAsDeveloper ? chalk.rgb(...rgb) : x => x
@@ -39,8 +39,8 @@ class Logger {
           format: combine(format.printf(formatInfo))
         }),
         new transports.File({
-          filename: this._pathNameSpaceLog,
-          format: combine(timestamp(), json())
+          filename: this._pathFullConsoleLog,
+          format: combine(format.printf(formatInfo))
         }),
         new transports.File({
           filename: this._pathFullLog,
