@@ -54,8 +54,9 @@ class Scrapper extends Array {
     await this._brand.startScrapper()
 
     this._movies = await this.gettingAllMovies()
+    // this._movies = {{ movie:{name: 'Judy',cover:'http://logo.jpg',anchorSchedule: 'path/judy'},city: { id: '20', key: 'cdmx-centro', text: 'CDMX Centro' }}}
 
-    /*for (const movieByCountry of this._moviesByCityMerged) {
+    for (const movieByCountry of this._movies) {
       await this.goOrNotGo(movieByCountry.movie.anchorSchedule)
 
       const locationsByMovieAndCity = new this._LocationsByMovieAndCityImpClass(
@@ -67,6 +68,7 @@ class Scrapper extends Array {
       )
       await locationsByMovieAndCity.startScrapper()
       this._locations.push(locationsByMovieAndCity)
+      // locationsByMovieAndCity.locations = [{ name: 'Cinépolis VIP Plaza Satélite', index: '0' }]
 
       for (const location of locationsByMovieAndCity.locations) {
         await locationsByMovieAndCity.unSelectLocations()
@@ -84,7 +86,7 @@ class Scrapper extends Array {
       }
     }
 
-    await this.saveItemsScrapped()*/
+    await this.saveItemsScrapped()
     logger.info('End scrapping')
   }
 
@@ -126,10 +128,10 @@ class Scrapper extends Array {
     const options = {
       uriConnection: {
         protocol: `mongodb+srv`,
-        database: config.get('db_name'),
-        user: config.get('db_user'),
-        password: config.get('db_pwd'),
-        host: config.get('db_host')
+        database: config.get('private.db_name'),
+        user: config.get('private.db_user'),
+        password: config.get('private.db_pwd'),
+        host: config.get('private.db_host')
       }
     }
 
@@ -151,22 +153,24 @@ class Scrapper extends Array {
   get itemsScrapped() {
     return this._flattenDepth(
       this._locations.map(element => {
-        return element.locations.map(item => {
-          return {
-            brand: this._brand.json,
-            movie: {
-              name: element.filter.movie.name,
-              cover: element.filter.movie.cover
-            },
-            location: {
-              name: item.name,
-              latitude: 19.449582,
-              longitude: -99.0723182,
-              address: 'xxx'
-            },
-            schedules: item.times
-          }
-        })
+        return element.locations
+          .map(item => {
+            return {
+              brand: this._brand.json,
+              movie: {
+                name: element.filter.movie.name,
+                cover: element.filter.movie.cover
+              },
+              location: {
+                name: item.name,
+                latitude: 19.449582,
+                longitude: -99.0723182,
+                address: 'xxx'
+              },
+              schedules: item.times
+            }
+          })
+          .filter(item => item.schedules.length > 0)
       })
     )
   }

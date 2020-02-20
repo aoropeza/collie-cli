@@ -4,7 +4,7 @@
 
 const { Logger } = require('../logger')
 
-const logger = new Logger('collie:cli:Template:SchedulesBy')
+const logger = new Logger('collie:cli:Template:SchedulesBy', 0, [153, 153, 153])
 
 class SchedulesBy {
   constructor(page, filter) {
@@ -14,7 +14,7 @@ class SchedulesBy {
   }
 
   async startScrapper() {
-    logger.info('[Method] startScrapper')
+    logger.info('startScrapper()')
     throw new Error('Please implement this in inheritors')
   }
 

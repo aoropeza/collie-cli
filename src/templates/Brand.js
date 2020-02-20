@@ -4,7 +4,7 @@
 
 const { Logger } = require('../logger')
 
-const logger = new Logger('collie:cli:Template:Brand', 2, [102, 255, 102])
+const logger = new Logger('collie:cli:Template:Brand', 2, [153, 153, 153])
 
 class Brand {
   constructor(name, page) {

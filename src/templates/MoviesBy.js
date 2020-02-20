@@ -4,7 +4,7 @@
 
 const { Logger } = require('../logger')
 
-const logger = new Logger('collie:cli:Template:MoviesBy')
+const logger = new Logger('collie:cli:Template:MoviesBy', 0, [153, 153, 153])
 
 class MoviesBy {
   constructor(page, filter) {
@@ -14,7 +14,7 @@ class MoviesBy {
   }
 
   async startScrapper() {
-    logger.info('[Method] startScrapper')
+    logger.info('startScrapper()')
     throw new Error('Please implement this in inheritors')
   }
 

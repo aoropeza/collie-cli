@@ -7,7 +7,11 @@ const { LocationsBy } = require('../../templates/LocationsBy')
 const { Config } = require('../../config')
 const { Logger } = require('../../logger')
 
-const logger = new Logger('collie:cli:Imp:Cinepolis:LocationsByMovieAndCity')
+const logger = new Logger(
+  'collie:cli:Imp:Cinepolis:LocationsByMovieAndCity',
+  4,
+  [102, 255, 204]
+)
 
 class LocationsByMovieAndCity extends LocationsBy {
   constructor(page, filter) {
@@ -34,9 +38,6 @@ class LocationsByMovieAndCity extends LocationsBy {
   }
 
   async scrapeLocations() {
-    logger.info(`[Method] scrapeLocations`)
-    logger.info(`Setting country: ${this._filter.city.key}`)
-
     try {
       await this._page.waitFor(
         `#cmbCiudadesHorario>option[value*="${this._filter.city.key}"]`,
@@ -55,10 +56,14 @@ class LocationsByMovieAndCity extends LocationsBy {
       )
 
       this._locations = await this.buildAllSelectedLocations()
-      logger.info(`All locations count: ${this._locations.length}`)
-      logger.info(this._locations)
+      logger.info(
+        `scrapeLocations() ${this._locations.length} locations found for '${this._filter.movie.name}' in '${this._filter.city.key}'`
+      )
+      logger.info(this._locations.map(item => item.name).join(', '))
     } catch (e) {
-      logger.error(`Movie don't have locations for this citie`)
+      logger.error(
+        `scrapeLocations() '${this._filter.movie.name}' doesn't have locations in '${this._filter.city.key}'`
+      )
     }
   }
 

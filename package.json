@@ -8,9 +8,9 @@
     "format:check": "prettier --check \"**/*.{js,json,md,yaml}\"",
     "lint": "npm run format:check && eslint .",
     "test": "jest --forceExit",
-    "start:dev": "ENV=dev node index",
+    "start:dev": "DEBUG=collie* ENV=dev node index",
     "start:stage": "ENV=stage node index",
-    "start:prod": "node index"
+    "start": "node index"
   },
   "author": "Alejandro Oropeza",
   "license": "MIT",

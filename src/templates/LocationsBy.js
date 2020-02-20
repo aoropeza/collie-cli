@@ -4,7 +4,7 @@
 
 const { Logger } = require('../logger')
 
-const logger = new Logger('collie:cli:Template:LocationsBy')
+const logger = new Logger('collie:cli:Template:LocationsBy', 4, [153, 153, 153])
 
 class LocationsBy {
   constructor(page, filter) {
@@ -14,17 +14,17 @@ class LocationsBy {
   }
 
   async startScrapper() {
-    logger.info('[Method] startScrapper')
+    logger.info('startScrapper()')
     await this.scrapeLocations()
   }
 
   async scrapeLocations() {
-    logger.info('[Method] scrapeLocations')
+    logger.info('scrapeLocations()')
     throw new Error('Please implement this in inheritors')
   }
 
   async unSelectLocations() {
-    logger.info('[Method] unSelectLocations')
+    logger.info('unSelectLocations()')
     throw new Error('Please implement this in inheritors')
   }
 
