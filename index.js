@@ -114,7 +114,13 @@ const handleFatalError = async err => {
     .then(cinepolisScrapper)
     .then(cinemexScrapper)
     .then(closePuppeteer)
-    .then(() => Notifications.publishSuccess(`Everything was fine`))
+    .then(() =>
+      logger
+        .fullLog()
+        .then(log =>
+          Notifications.publishSuccess(`Everything was fine: \n${log}`)
+        )
+    )
     .catch(err => {
       logger.error(err.message)
       return Notifications.publishError(`Exception: ${err.message}`)

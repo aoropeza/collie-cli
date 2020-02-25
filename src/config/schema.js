@@ -10,7 +10,7 @@ const schema = {
   log_location: {
     doc: `Local log location. Without last '/'`,
     format: String,
-    default: './logs',
+    default: 'logs',
     env: 'LOG_LOCATION'
   },
   debug_mode: {

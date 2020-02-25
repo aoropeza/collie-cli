@@ -47,7 +47,7 @@ class Scrapper extends Array {
   async start() {
     const log = `start() Starting. Getting info from: ${this._momentToFilter}`
     logger.info(log)
-    await Notifications.publishSuccess(log)
+    await Notifications.publish(log)
 
     await this._page.goto(this._baseUrl, Config.gotoOptions)
 

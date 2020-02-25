@@ -1,5 +1,12 @@
 'use strict'
 
+const fs = require('fs')
+const path = require('path')
+const { promisify } = require('util')
+
+const readFile = promisify(fs.readFile)
+const writeFile = promisify(fs.writeFile)
+
 const chalk = require('chalk')
 const { createLogger, format, transports } = require('winston')
 
@@ -13,6 +20,7 @@ class Logger {
     this._nameSpace = nameSpace
     this._pathFullLog = `${config.get('log_location')}/full.log`
     this._pathFullConsoleLog = `${config.get('log_location')}/full_console.log`
+
     this._debugAsDeveloper = config.get('debug_mode') === 'developer'
     this._depth = this._debugAsDeveloper ? '    '.repeat(depth) : ''
     this._colorize = this._debugAsDeveloper ? chalk.rgb(...rgb) : x => x
@@ -39,11 +47,11 @@ class Logger {
           format: combine(format.printf(formatInfo))
         }),
         new transports.File({
-          filename: this._pathFullConsoleLog,
+          filename: path.join(__dirname, '/', this._pathFullConsoleLog),
           format: combine(format.printf(formatInfo))
         }),
         new transports.File({
-          filename: this._pathFullLog,
+          filename: path.join(__dirname, '/', this._pathFullLog),
           format: combine(timestamp(), json())
         })
       ]
@@ -69,6 +77,10 @@ class Logger {
       level: 'info',
       message
     })
+  }
+
+  async fullLog() {
+    return readFile(path.resolve(__dirname, this._pathFullLog), 'utf-8')
   }
 }
 
