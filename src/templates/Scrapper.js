@@ -110,9 +110,9 @@ class Scrapper extends Array {
         `MovieRestriction enable. Scrapping just for ${this._movieRestriction.names}`
       )
 
-      const whiteListMovies = this._movieRestriction.names.map(x =>
-        x.toLowerCase()
-      )
+      const whiteListMovies = this._movieRestriction.names
+        .split(',')
+        .map(x => x.toLowerCase())
       movies = movies.filter(
         item =>
           whiteListMovies.filter(x => item.movie.name.toLowerCase().includes(x))

@@ -70,9 +70,9 @@ const schema = {
         env: 'MAX_MOVIES_ENABLE'
       },
       names: {
-        doc: `Array of movie's name. Just if enable is true`,
-        format: Array,
-        default: [],
+        doc: `Comma separated list of movie's name. Just if enable is true`,
+        format: String,
+        default: '',
         env: 'NAMES_MOVIES'
       }
     },
