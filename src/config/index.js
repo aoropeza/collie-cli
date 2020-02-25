@@ -17,7 +17,7 @@ class Config {
         : undefined
     }
 
-    const env = this._config.get('env')
+    const env = this._config.get('variables.env')
 
     this._load(`${env}.json`)
     this._load('local.json')

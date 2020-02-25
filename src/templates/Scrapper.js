@@ -6,7 +6,6 @@
 const { UsesCases } = require('collie-uses-cases')
 
 const { Config } = require('../config')
-const { Notifications } = require('../lib/Notifications')
 const { Logger } = require('../logger')
 
 const logger = new Logger('collie:cli:Template:Scrapper', 1, [0, 153, 255])
@@ -47,7 +46,6 @@ class Scrapper extends Array {
   async start() {
     const log = `start() Starting. Getting info from: ${this._momentToFilter}`
     logger.info(log)
-    await Notifications.publish(log)
 
     await this._page.goto(this._baseUrl, Config.gotoOptions)
 
@@ -109,14 +107,20 @@ class Scrapper extends Array {
 
     if (this._movieRestriction.enable) {
       logger.info(
-        `MovieRestriction enable. Scrapping just for ${this._movieRestriction.name}`
+        `MovieRestriction enable. Scrapping just for ${this._movieRestriction.names}`
       )
-      movies = movies.filter(item =>
-        item.movie.name
-          .toLowerCase()
-          .includes(this._movieRestriction.name.toLowerCase().toLowerCase())
+
+      const whiteListMovies = this._movieRestriction.names.map(x =>
+        x.toLowerCase()
+      )
+      movies = movies.filter(
+        item =>
+          whiteListMovies.filter(x => item.movie.name.toLowerCase().includes(x))
+            .length > 0
       )
     }
+
+    movies = movies.sort((x, y) => x.movie.name.localeCompare(y.movie.name))
 
     logger.info(
       `gettingAllMovies() ${movies.length}  movies of ${this._brand.cities.length} cities`
@@ -128,10 +132,10 @@ class Scrapper extends Array {
     const options = {
       uriConnection: {
         protocol: `mongodb+srv`,
-        database: config.get('private.db_name'),
-        user: config.get('private.db_user'),
-        password: config.get('private.db_pwd'),
-        host: config.get('private.db_host')
+        database: config.get('variables.privates.db_name'),
+        user: config.get('variables.privates.db_user'),
+        password: config.get('variables.privates.db_pwd'),
+        host: config.get('variables.privates.db_host')
       }
     }
 

@@ -17,16 +17,16 @@ const config = new Config()
 class Logger {
   constructor(nameSpace, depth = 0, rgb = [255, 255, 255]) {
     this._nameSpace = nameSpace
-    this._pathLog = `${config.get('log_location')}/log.log`
+    this._pathLog = `${config.get('variables.log_location')}/log.log`
 
-    this._debugAsDeveloper = config.get('debug_mode') === 'developer'
+    this._debugAsDeveloper = config.get('variables.debug_mode') === 'developer'
     this._depth = this._debugAsDeveloper ? '    '.repeat(depth) : ''
     this._colorize = this._debugAsDeveloper ? chalk.rgb(...rgb) : x => x
 
     const formatInfo = colors => ({ level, ...infoTmp }) => {
       const info = {
         level,
-        nameSpace: colors ? this._colorize(this._nameSpace) : this._nameSpace,
+        nameSpace: this._nameSpace,
         ...infoTmp
       }
       const toString = value =>
@@ -35,7 +35,12 @@ class Logger {
           : JSON.stringify(value)
 
       return `${this._depth}{${Object.keys(info)
-        .map(key => `"${key}": ${this._colorize(toString(info[key]))}`)
+        .map(
+          key =>
+            `"${key}": ${
+              colors ? this._colorize(toString(info[key])) : toString(info[key])
+            }`
+        )
         .join(', ')}}`
     }
 

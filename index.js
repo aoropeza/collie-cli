@@ -28,13 +28,13 @@ const config = new Config()
 
 let browser
 let page
-let retries = config.get('retry')
+let retries = config.get('variables.retry')
 
 const preparePuppeteer = async () => {
   logger.info(`Preparing Puppeteer`)
   const options = {
     headless: true,
-    ...(config.get('docker_env')
+    ...(config.get('variables.docker_env')
       ? {
           executablePath: '/usr/bin/chromium-browser',
           args: ['--disable-setuid-sandbox', '--no-sandbox']
@@ -47,24 +47,22 @@ const preparePuppeteer = async () => {
   await page.setViewport({ width: 1000, height: 800 })
 }
 
-const closePuppeteer = async () => {
-  logger.info(`Closing Puppeteer`)
-  await browser.close()
-}
 // eslint-disable-next-line consistent-return
 const cinepolisScrapper = async () => {
-  logger.info(`Starting Cinepolis Scrapper. Enable: ${config.get('cinepolis')}`)
-  if (config.get('cinepolis')) {
+  logger.info(
+    `Starting Cinepolis Scrapper. Enable: ${config.get('variables.cinepolis')}`
+  )
+  if (config.get('variables.cinepolis')) {
     try {
       const scrapperImpCinepolis = new ScrapperImpCinepolis(
         page,
-        config.get('movie_restriction'),
+        config.get('variables.movie_restriction'),
         {
           nameBrand: 'Cinépolis',
           baseUrl: 'http://cinepolis.com',
           momentToFilter: moment()
             .locale('es')
-            .add(config.get('days'), 'days')
+            .add(config.get('variables.days'), 'days')
         },
         BrandImpCinepolis,
         MoviesByCityImpCinepolis,
@@ -92,41 +90,51 @@ const cinepolisScrapper = async () => {
 }
 
 const cinemexScrapper = async () => {
-  logger.info(`Starting Cinemex Scrapper. Enable: ${config.get('cinemex')}`)
-  /*if (config.get('cinemex')) {
+  logger.info(
+    `Starting Cinemex Scrapper. Enable: ${config.get('variables.cinemex')}`
+  )
+  /*if (config.get('variables.cinemex')) {
     console.log('scrapping cinemex...')
   }*/
 }
-
-const handleFatalError = async err => {
-  const messageToLog = `Exception. Message: ${err.message}, Stack: ${err.stack}`
-  logger.fatal(messageToLog)
-  await Notifications.publishError(messageToLog)
-  process.exit(1)
+const publishAndExit = async (publishFunction, message, codeExit) => {
+  if (codeExit !== 0) logger.error(message)
+  const log = await logger.fullLog()
+  await publishFunction(`${message}: \n${log}`)
+  process.exit(codeExit)
 }
+
+const handleFatalError = async err =>
+  publishAndExit(
+    Notifications.publishError,
+    `Exception. Message: ${err.message}, Stack: ${err.stack}`,
+    1
+  )
+
 ;(async () =>
   Promise.resolve()
     .then(() => {
-      logger.info(`Running for env: ${config.get('env')}`)
+      logger.info(`Running for env: ${config.get('variables.env')}`)
+      const { privates, ...vars } = config.get('variables')
+      return Notifications.publish(`Starting: ${JSON.stringify(vars, null, 4)}`)
     })
     .then(preparePuppeteer)
     .then(cinepolisScrapper)
     .then(cinemexScrapper)
-    .then(closePuppeteer)
+    .then(() => {
+      logger.info(`Closing Puppeteer`)
+      return browser.close()
+    })
     .then(() =>
-      logger
-        .fullLog()
-        .then(log =>
-          Notifications.publishSuccess(`Everything was fine: \n${log}`)
-        )
-        .then(() => process.exit(0))
+      publishAndExit(Notifications.publishSuccess, 'Everything was fine', 0)
     )
-    .catch(err => {
-      logger.error(err.message)
-      Notifications.publishError(`Exception: ${err.message}`).then(() =>
-        process.exit(0)
+    .catch(err =>
+      publishAndExit(
+        Notifications.publishError,
+        `Exception. Message: ${err.message}, Stack: ${err.stack}`,
+        1
       )
-    }))()
+    ))()
 
 process.on('uncaughtException', handleFatalError)
 process.on('unhandledRejection', handleFatalError)
