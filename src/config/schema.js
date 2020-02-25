@@ -19,6 +19,12 @@ const schema = {
     default: 'machine',
     env: 'DEBUG_MODE'
   },
+  environment_running: {
+    doc: 'Specify the environment in which it is running',
+    format: ['locally', 'server'],
+    default: 'server',
+    env: 'ENVIRONMENT_RUNNING'
+  },
   timeout_page: {
     doc: 'Max timeout in milliseconds to wait a page',
     format: 'int',

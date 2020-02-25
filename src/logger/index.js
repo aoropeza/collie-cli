@@ -5,12 +5,11 @@ const path = require('path')
 const { promisify } = require('util')
 
 const readFile = promisify(fs.readFile)
-const writeFile = promisify(fs.writeFile)
 
 const chalk = require('chalk')
 const { createLogger, format, transports } = require('winston')
 
-const { timestamp, json, combine } = format
+const { combine } = format
 const { Config } = require('../config')
 
 const config = new Config()
@@ -18,17 +17,16 @@ const config = new Config()
 class Logger {
   constructor(nameSpace, depth = 0, rgb = [255, 255, 255]) {
     this._nameSpace = nameSpace
-    this._pathFullLog = `${config.get('log_location')}/full.log`
-    this._pathFullConsoleLog = `${config.get('log_location')}/full_console.log`
+    this._pathLog = `${config.get('log_location')}/log.log`
 
     this._debugAsDeveloper = config.get('debug_mode') === 'developer'
     this._depth = this._debugAsDeveloper ? '    '.repeat(depth) : ''
     this._colorize = this._debugAsDeveloper ? chalk.rgb(...rgb) : x => x
 
-    const formatInfo = ({ level, ...infoTmp }) => {
+    const formatInfo = colors => ({ level, ...infoTmp }) => {
       const info = {
         level,
-        nameSpace: this._colorize(this._nameSpace),
+        nameSpace: colors ? this._colorize(this._nameSpace) : this._nameSpace,
         ...infoTmp
       }
       const toString = value =>
@@ -44,15 +42,11 @@ class Logger {
     this._logger = createLogger({
       transports: [
         new transports.Console({
-          format: combine(format.printf(formatInfo))
+          format: combine(format.printf(formatInfo(true)))
         }),
         new transports.File({
-          filename: path.join(__dirname, '/', this._pathFullConsoleLog),
-          format: combine(format.printf(formatInfo))
-        }),
-        new transports.File({
-          filename: path.join(__dirname, '/', this._pathFullLog),
-          format: combine(timestamp(), json())
+          filename: path.join(__dirname, '/', this._pathLog),
+          format: combine(format.printf(formatInfo(false)))
         })
       ]
     })
@@ -80,7 +74,7 @@ class Logger {
   }
 
   async fullLog() {
-    return readFile(path.resolve(__dirname, this._pathFullLog), 'utf-8')
+    return readFile(path.resolve(__dirname, this._pathLog), 'utf-8')
   }
 }
 

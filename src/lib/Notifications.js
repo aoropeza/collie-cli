@@ -43,10 +43,16 @@ class Notifications {
   }
 
   static async publishSuccess(message) {
+    console.log('environment_running', config.get('environment_running'))
+
     const noti = new Notifications()
     await noti
       .message(message)
-      .subject(`[${config.get('env')}] Collie Cli - Success`)
+      .subject(
+        `CollieCli: Success (${config.get('env')}-${config.get(
+          'environment_running'
+        )}))`
+      )
       .channel(config.get('private.channel_notifications'))
       .build()
   }
@@ -55,7 +61,11 @@ class Notifications {
     const noti = new Notifications()
     await noti
       .message(message)
-      .subject(`[${config.get('env')}] Collie Cli - Error`)
+      .subject(
+        ` CollieCli: Error (${config.get('env')}-${config.get(
+          'environment_running'
+        )})`
+      )
       .channel(config.get('private.channel_notifications'))
       .build()
   }
@@ -64,7 +74,11 @@ class Notifications {
     const noti = new Notifications()
     await noti
       .message(message)
-      .subject(`[${config.get('env')}] Collie Cli`)
+      .subject(
+        ` CollieCli: (${config.get('env')}-${config.get(
+          'environment_running'
+        )})`
+      )
       .channel(config.get('private.channel_notifications'))
       .build()
   }

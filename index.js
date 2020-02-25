@@ -104,7 +104,6 @@ const handleFatalError = async err => {
   await Notifications.publishError(messageToLog)
   process.exit(1)
 }
-
 ;(async () =>
   Promise.resolve()
     .then(() => {
@@ -120,12 +119,14 @@ const handleFatalError = async err => {
         .then(log =>
           Notifications.publishSuccess(`Everything was fine: \n${log}`)
         )
+        .then(() => process.exit(0))
     )
     .catch(err => {
       logger.error(err.message)
-      return Notifications.publishError(`Exception: ${err.message}`)
-    })
-    .finally(() => process.exit(0)))()
+      Notifications.publishError(`Exception: ${err.message}`).then(() =>
+        process.exit(0)
+      )
+    }))()
 
 process.on('uncaughtException', handleFatalError)
 process.on('unhandledRejection', handleFatalError)
