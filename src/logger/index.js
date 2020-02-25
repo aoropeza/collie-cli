@@ -1,11 +1,9 @@
 'use strict'
 
 const fs = require('fs')
-const path = require('path')
 const { promisify } = require('util')
 
-const readFile = promisify(fs.readFile)
-
+const { v4: uuidv4 } = require('uuid')
 const chalk = require('chalk')
 const { createLogger, format, transports } = require('winston')
 
@@ -13,11 +11,14 @@ const { combine } = format
 const { Config } = require('../config')
 
 const config = new Config()
+const readFile = promisify(fs.readFile)
 
 class Logger {
   constructor(nameSpace, depth = 0, rgb = [255, 255, 255]) {
     this._nameSpace = nameSpace
-    this._pathLog = `${config.get('variables.log_location')}/log.log`
+    this._pathLog = `${config.get('variables.log_location')}/log-${
+      Logger.uuid
+    }.log`
 
     this._debugAsDeveloper = config.get('variables.debug_mode') === 'developer'
     this._depth = this._debugAsDeveloper ? '    '.repeat(depth) : ''
@@ -82,5 +83,6 @@ class Logger {
     return readFile(this._pathLog, 'utf-8')
   }
 }
+Logger.uuid = uuidv4()
 
 module.exports = { Logger }
