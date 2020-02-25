@@ -39,4 +39,4 @@ USER pptruser
 
 COPY . .
 
-CMD ["sh", "-c", "npm start -- -c -x --retry 1 --maxmovies 1 -t 60000 --timeoutobject 1000 --dockerenv"]
+CMD ["sh", "-c", "npm run start:dev"]

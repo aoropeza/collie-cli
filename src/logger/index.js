@@ -50,7 +50,7 @@ class Logger {
           format: combine(format.printf(formatInfo(true)))
         }),
         new transports.File({
-          filename: path.join(__dirname, '/', this._pathLog),
+          filename: this._pathLog,
           format: combine(format.printf(formatInfo(false)))
         })
       ]
@@ -79,7 +79,7 @@ class Logger {
   }
 
   async fullLog() {
-    return readFile(path.resolve(__dirname, this._pathLog), 'utf-8')
+    return readFile(this._pathLog, 'utf-8')
   }
 }
 
