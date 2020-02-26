@@ -50,7 +50,7 @@ class Scrapper extends Array {
     try {
       await this._page.goto(this._baseUrl, config.gotoOptions)
     } catch (e) {
-      logger.info(e)
+      logger.error(e)
     }
 
     await this._brand.startScrapper()

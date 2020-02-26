@@ -23,19 +23,24 @@ class LocationsByMovieAndCity extends LocationsBy {
   }
 
   async buildAllSelectedLocations() {
-    const allLocations = await this._page.$$eval(
-      this._selectorForActiveLocations,
-      liElements =>
-        liElements.map(item => {
-          // eslint-disable-next-line no-var
-          return {
-            name: item.querySelector('span').innerText,
-            index: item
-              .querySelector('a')
-              .getAttribute('data-option-array-index')
-          }
-        })
-    )
+    let allLocations = []
+    try {
+      allLocations = await this._page.$$eval(
+        this._selectorForActiveLocations,
+        liElements =>
+          liElements.map(item => {
+            // eslint-disable-next-line no-var
+            return {
+              name: item.querySelector('span').innerText,
+              index: item
+                .querySelector('a')
+                .getAttribute('data-option-array-index')
+            }
+          })
+      )
+    } catch (error) {
+      logger.error(error)
+    }
     return allLocations.filter(item => Object.keys(item).length > 0)
   }
 
@@ -76,9 +81,9 @@ class LocationsByMovieAndCity extends LocationsBy {
     logger.info(`Locations to unselected: ${currentSelectedlocations.length}`)
 
     for (const location of currentSelectedlocations) {
-      const selector = `#cmbComplejo_chosen>ul.chosen-choices>li.search-choice>a[data-option-array-index="${location.index}"]`
-      const button = await this._page.$(selector)
       try {
+        const selector = `#cmbComplejo_chosen>ul.chosen-choices>li.search-choice>a[data-option-array-index="${location.index}"]`
+        const button = await this._page.$(selector)
         await button.click()
       } catch (e) {
         logger.error(`button click error ${e}`)

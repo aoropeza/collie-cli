@@ -16,42 +16,50 @@ const logger = new Logger(
 
 class SchedulesByMovieCityAndLocation extends SchedulesBy {
   async startScrapper() {
-    await this._page.click(
-      `#cmbComplejo_chosen ul.chosen-choices>li.search-field>input`,
-      { clickCount: 3 }
-    )
-    await this._page.keyboard.press('Backspace')
+    let duration = ''
+    let promisesToScrappedTimes = []
 
-    await this._page.type(
-      `#cmbComplejo_chosen ul.chosen-choices>li.search-field>input`,
-      this._filter.selectedLocation.name,
-      { delay: 100 }
-    )
+    try {
+      await this._page.click(
+        `#cmbComplejo_chosen ul.chosen-choices>li.search-field>input`,
+        { clickCount: 3 }
+      )
+      await this._page.keyboard.press('Backspace')
 
-    const selector = `#cmbComplejo_chosen ul.chosen-results>li.active-result[data-option-array-index="${this._filter.selectedLocation.index}"]`
-    const button = await this._page.$(selector)
-    await button.click()
+      await this._page.type(
+        `#cmbComplejo_chosen ul.chosen-choices>li.search-field>input`,
+        this._filter.selectedLocation.name,
+        { delay: 100 }
+      )
 
-    await this._page.select('#cmbFechas', this._filter.date.format('DD MMMM'))
+      const selector = `#cmbComplejo_chosen ul.chosen-results>li.active-result[data-option-array-index="${this._filter.selectedLocation.index}"]`
+      const button = await this._page.$(selector)
+      await button.click()
 
-    /**
-     * Scrapping: Getting times
-     */
-    const duration = await this._page.$eval(
-      '#ContentPlaceHolder1_ctl_sinopsis_ctl_duracion',
-      el => el.innerText
-    )
+      await this._page.select('#cmbFechas', this._filter.date.format('DD MMMM'))
 
-    const timesHandles = await this._page.$$(
-      'div.location:not(.locationHide) time>a'
-    )
-    const promisesToScrappedTimes = timesHandles.map(item =>
-      this._page.evaluate(timeHandle => {
-        return {
-          time: timeHandle.innerText
-        }
-      }, item)
-    )
+      /**
+       * Scrapping: Getting times
+       */
+      duration = await this._page.$eval(
+        '#ContentPlaceHolder1_ctl_sinopsis_ctl_duracion',
+        el => el.innerText
+      )
+
+      const timesHandles = await this._page.$$(
+        'div.location:not(.locationHide) time>a'
+      )
+      promisesToScrappedTimes = timesHandles.map(item =>
+        this._page.evaluate(timeHandle => {
+          return {
+            time: timeHandle.innerText
+          }
+        }, item)
+      )
+    } catch (error) {
+      logger.error(error)
+    }
+
     const times = await Promise.all(promisesToScrappedTimes)
 
     logger.info(

@@ -75,8 +75,8 @@ const cinepolisScrapper = async () => {
         `Cinepolis items count: ${scrapperImpCinepolis.itemsScrapped.length}`
       )
     } catch (e) {
-      logger.info(`Fail something with 'cinepolisScrapper'`)
-      logger.info(JSON.stringify(e))
+      logger.error(`Fail something with 'cinepolisScrapper'`)
+      logger.error(JSON.stringify(e))
 
       retries -= 1
       if (retries <= 0) {
@@ -93,9 +93,6 @@ const cinemexScrapper = async () => {
   logger.info(
     `Starting Cinemex Scrapper. Enable: ${config.get('variables.cinemex')}`
   )
-  /*if (config.get('variables.cinemex')) {
-    console.log('scrapping cinemex...')
-  }*/
 }
 const publishAndExit = async (publishFunction, message, codeExit) => {
   if (codeExit !== 0) logger.error(message)
