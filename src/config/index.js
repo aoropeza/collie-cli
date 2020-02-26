@@ -27,5 +27,25 @@ class Config {
   get(key) {
     return this._config.get(key)
   }
+
+  get gotoOptions() {
+    return {
+      timeout: this._config.get('variables.timeout_page'),
+      waitUntil: 'networkidle2'
+    }
+  }
+
+  get waitForOptions() {
+    return {
+      timeout: this._config.get('variables.timeout_object')
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get waitForOptionsImmediately() {
+    return {
+      timeout: 1000
+    }
+  }
 }
 module.exports = { Config }

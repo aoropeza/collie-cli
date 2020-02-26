@@ -7,6 +7,8 @@ const { LocationsBy } = require('../../templates/LocationsBy')
 const { Config } = require('../../config')
 const { Logger } = require('../../logger')
 
+const config = new Config()
+
 const logger = new Logger(
   'collie:cli:Imp:Cinepolis:LocationsByMovieAndCity',
   4,
@@ -41,7 +43,7 @@ class LocationsByMovieAndCity extends LocationsBy {
     try {
       await this._page.waitFor(
         `#cmbCiudadesHorario>option[value*="${this._filter.city.key}"]`,
-        Config.waitForOptionsImmediately
+        config.waitForOptionsImmediately
       )
       await this._page.select('#cmbCiudadesHorario', this._filter.city.key)
       await this._page.waitFor(5000)

@@ -47,7 +47,7 @@ class Scrapper extends Array {
     const log = `start() Starting. Getting info from: ${this._momentToFilter}`
     logger.info(log)
 
-    await this._page.goto(this._baseUrl, Config.gotoOptions)
+    await this._page.goto(this._baseUrl, config.gotoOptions)
 
     await this._brand.startScrapper()
 
@@ -93,7 +93,7 @@ class Scrapper extends Array {
       this.lastKeyUrl = newUrlKey
       const gotoUrl = `${this._baseUrl}/${this.lastKeyUrl}`
       logger.info(`(goOrNotGo) Going to ${gotoUrl}`)
-      await this._page.goto(gotoUrl, Config.gotoOptions)
+      await this._page.goto(gotoUrl, config.gotoOptions)
     }
   }
 

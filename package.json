@@ -1,6 +1,6 @@
 {
   "name": "collie-cli",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "CLI for collie",
   "main": "index.js",
   "scripts": {
