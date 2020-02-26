@@ -40,7 +40,8 @@ const preparePuppeteer = async () => {
           args: [
             '--disable-setuid-sandbox',
             '--no-sandbox',
-            '--disable-dev-shm-usage'
+            '--disable-dev-shm-usage',
+            '--full-memory-crash-report'
           ]
         }
       : {})
