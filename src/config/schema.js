@@ -35,7 +35,7 @@ const schema = {
     timeout_object: {
       doc: 'Max timeout in milliseconds to wait an object',
       format: 'int',
-      default: 60,
+      default: 30000,
       env: 'TIMEOUT_OBJECT'
     },
     days: {

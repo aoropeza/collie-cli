@@ -30,8 +30,7 @@ class Config {
 
   get gotoOptions() {
     return {
-      timeout: this._config.get('variables.timeout_page'),
-      waitUntil: 'networkidle2'
+      timeout: this._config.get('variables.timeout_page')
     }
   }
 
