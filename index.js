@@ -37,7 +37,11 @@ const preparePuppeteer = async () => {
     ...(config.get('variables.docker_env')
       ? {
           executablePath: '/usr/bin/chromium-browser',
-          args: ['--disable-setuid-sandbox', '--no-sandbox']
+          args: [
+            '--disable-setuid-sandbox',
+            '--no-sandbox',
+            '--disable-dev-shm-usage'
+          ]
         }
       : {})
   }
