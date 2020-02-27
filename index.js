@@ -76,9 +76,10 @@ const cinepolisScrapper = async () => {
         { uniqBy, flattenDepth }
       )
       await scrapperImpCinepolis.start()
-      logger.info(
-        `Cinepolis items count: ${scrapperImpCinepolis.itemsScrapped.length}`
-      )
+
+      const finalMsg = `Cinepolis items count: ${scrapperImpCinepolis.itemsScrapped.length}`
+      logger.info(finalMsg)
+      return finalMsg
     } catch (e) {
       logger.error(`Fail something with 'cinepolisScrapper'`)
       logger.error(JSON.stringify(e))
@@ -98,11 +99,14 @@ const cinemexScrapper = async () => {
   logger.info(
     `Starting Cinemex Scrapper. Enable: ${config.get('variables.cinemex')}`
   )
+
+  const finalMsg = `Cinepolis items count: 0`
+  logger.info(finalMsg)
+  return finalMsg
 }
 const publishAndExit = async (publishFunction, message, codeExit) => {
   if (codeExit !== 0) logger.error(message)
-  const log = await logger.fullLog()
-  await publishFunction(`${message}: \n${log}`)
+  await publishFunction(`${message}`, logger.path)
   process.exit(codeExit)
 }
 
@@ -122,13 +126,24 @@ const handleFatalError = async err =>
     })
     .then(preparePuppeteer)
     .then(cinepolisScrapper)
-    .then(cinemexScrapper)
-    .then(() => {
-      logger.info(`Closing Puppeteer`)
-      return browser.close()
+    .then(async cinepolis => {
+      const cinemex = await cinemexScrapper()
+      return {
+        cinepolis,
+        cinemex
+      }
     })
-    .then(() =>
-      publishAndExit(Notifications.publishSuccess, 'Everything was fine', 0)
+    .then(async result => {
+      logger.info(`Closing Puppeteer`)
+      await browser.close()
+      return result
+    })
+    .then(result =>
+      publishAndExit(
+        Notifications.publishSuccess,
+        `Everything was fine: ${JSON.stringify(result, null, 4)}}`,
+        0
+      )
     )
     .catch(err =>
       publishAndExit(

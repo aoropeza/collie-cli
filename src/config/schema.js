@@ -83,12 +83,20 @@ const schema = {
       env: 'RETRY'
     },
     privates: {
-      channel_notifications: {
-        doc: 'Channel to publish notifications',
+      from_notifications: {
+        doc: 'Email address',
         format: String,
         default: null,
-        env: 'CHANNEL_NOTIFICATIONS'
+        env: 'FROM_NOTIFICATIONS'
       },
+
+      to_notifications: {
+        doc: 'Comma separated list of emails',
+        format: String,
+        default: null,
+        env: 'TO_NOTIFICATIONS'
+      },
+
       db_name: {
         doc: 'Local log location',
         format: String,

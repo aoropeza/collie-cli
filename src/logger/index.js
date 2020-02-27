@@ -79,8 +79,8 @@ class Logger {
     })
   }
 
-  async fullLog() {
-    return readFile(this._pathLog, 'utf-8')
+  get path() {
+    return this._pathLog
   }
 }
 Logger.uuid = uuidv4()
