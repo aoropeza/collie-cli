@@ -40,6 +40,7 @@ class LocationsByMovieAndCity extends LocationsBy {
       )
     } catch (error) {
       logger.error(error)
+      throw Error(error)
     }
     return allLocations.filter(item => Object.keys(item).length > 0)
   }
@@ -67,10 +68,11 @@ class LocationsByMovieAndCity extends LocationsBy {
         `scrapeLocations() ${this._locations.length} locations found for '${this._filter.movie.name}' in '${this._filter.city.key}'`
       )
       logger.info(this._locations.map(item => item.name).join(', '))
-    } catch (e) {
+    } catch (error) {
       logger.error(
         `scrapeLocations() '${this._filter.movie.name}' doesn't have locations in '${this._filter.city.key}'`
       )
+      throw Error(error)
     }
   }
 
@@ -85,8 +87,9 @@ class LocationsByMovieAndCity extends LocationsBy {
         const selector = `#cmbComplejo_chosen>ul.chosen-choices>li.search-choice>a[data-option-array-index="${location.index}"]`
         const button = await this._page.$(selector)
         await button.click()
-      } catch (e) {
-        logger.error(`button click error ${e}`)
+      } catch (error) {
+        logger.error(`button click error ${error.message}`)
+        throw Error(error)
       }
     }
   }

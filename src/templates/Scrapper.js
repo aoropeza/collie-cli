@@ -47,11 +47,7 @@ class Scrapper extends Array {
     const log = `start() Starting. Getting info from: ${this._momentToFilter}`
     logger.info(log)
 
-    try {
-      await this._page.goto(this._baseUrl, config.gotoOptions)
-    } catch (e) {
-      logger.error(e)
-    }
+    await this._page.goto(this._baseUrl, config.gotoOptions)
 
     await this._brand.startScrapper()
 
@@ -99,8 +95,9 @@ class Scrapper extends Array {
       logger.info(`(goOrNotGo) Going to ${gotoUrl}`)
       try {
         await this._page.goto(gotoUrl, config.gotoOptions)
-      } catch (e) {
-        logger.info(e)
+      } catch (error) {
+        logger.info(error)
+        throw Error(error)
       }
     }
   }

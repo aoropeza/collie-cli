@@ -58,6 +58,7 @@ class SchedulesByMovieCityAndLocation extends SchedulesBy {
       )
     } catch (error) {
       logger.error(error)
+      throw Error(error)
     }
 
     const times = await Promise.all(promisesToScrappedTimes)

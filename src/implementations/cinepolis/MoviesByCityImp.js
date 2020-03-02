@@ -47,6 +47,7 @@ class MoviesByCityImp extends MoviesBy {
       )
     } catch (error) {
       logger.error(error)
+      throw Error(error)
     }
     this._movies = allMovies.filter(item => Object.keys(item).length > 0)
     this._movies = this._movies.map(item =>

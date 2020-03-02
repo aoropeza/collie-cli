@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+
 'use strict'
 
 const puppeteer = require('puppeteer')
@@ -8,6 +10,9 @@ const { Notifications } = require('./src/lib/Notifications')
 const {
   ScrapperImp: ScrapperImpCinepolis
 } = require('./src/implementations/cinepolis/ScrapperImp')
+const {
+  ScrapperImp: ScrapperImpCinemex
+} = require('./src/implementations/cinemex/ScrapperImp')
 const {
   BrandImp: BrandImpCinepolis
 } = require('./src/implementations/cinepolis/BrandImp')
@@ -28,7 +33,6 @@ const config = new Config()
 
 let browser
 let page
-let retries = config.get('variables.retry')
 
 const preparePuppeteer = async () => {
   logger.info(`Preparing Puppeteer`)
@@ -52,58 +56,94 @@ const preparePuppeteer = async () => {
   await page.setViewport({ width: 1000, height: 800 })
 }
 
-// eslint-disable-next-line consistent-return
-const cinepolisScrapper = async () => {
-  logger.info(
-    `Starting Cinepolis Scrapper. Enable: ${config.get('variables.cinepolis')}`
-  )
-  if (config.get('variables.cinepolis')) {
-    try {
-      const scrapperImpCinepolis = new ScrapperImpCinepolis(
-        page,
-        config.get('variables.movie_restriction'),
-        {
-          nameBrand: 'Cinépolis',
-          baseUrl: 'http://cinepolis.com',
-          momentToFilter: moment()
-            .locale('es')
-            .add(config.get('variables.days'), 'days')
-        },
-        BrandImpCinepolis,
-        MoviesByCityImpCinepolis,
-        LocationsByMovieAndCityImpCinepolis,
-        SchedulesByMovieCityAndLocationImpCinepolis,
-        { uniqBy, flattenDepth }
-      )
-      await scrapperImpCinepolis.start()
+const brandScrapper = async (enable, retry, name, paramsScrapper) => {
+  return Promise.resolve()
+    .then(() => {
+      logger.info(`Starting ${name}. Enable: ${enable}`)
+    })
+    .then(async () => {
+      if (enable) {
+        const scrapperImp = new paramsScrapper.ScrapperImp(
+          paramsScrapper.page,
+          paramsScrapper.movieRestriction,
+          paramsScrapper.brandOptions,
+          paramsScrapper.BrandImp,
+          paramsScrapper.MoviesByCityImp,
+          paramsScrapper.LocationsByMovieAndCityImp,
+          paramsScrapper.SchedulesByMovieCityAndLocationImp,
+          paramsScrapper.methods
+        )
+        await scrapperImp.start()
+        const finalMsg = `Brand ${name} items count: ${scrapperImp.itemsScrapped.length}`
+        logger.info(finalMsg)
+        return finalMsg
+      }
+      return `Brand ${name} items count: 0 cause it's disable`
+    })
+    .catch(error => {
+      logger.error(`Fail something with '${name}'`)
+      logger.error(error.message)
 
-      const finalMsg = `Cinepolis items count: ${scrapperImpCinepolis.itemsScrapped.length}`
+      // eslint-disable-next-line no-param-reassign
+      retry -= 1
+      if (retry > 0) {
+        logger.info(`One more time, retry remaining: ${retry}`)
+        return brandScrapper(enable, retry, name, paramsScrapper)
+      }
+      const finalMsg = `No more retries for ${name}`
       logger.info(finalMsg)
       return finalMsg
-    } catch (e) {
-      logger.error(`Fail something with 'cinepolisScrapper'`)
-      logger.error(JSON.stringify(e))
-
-      retries -= 1
-      if (retries <= 0) {
-        logger.info(`No more retries, throwing error...`)
-        throw Error(`No more retries for 'cinepolisScrapper'`)
-      }
-      logger.info(`One more time, retry remaining: ${retries}`)
-      return cinepolisScrapper()
-    }
-  }
+    })
 }
 
-const cinemexScrapper = async () => {
-  logger.info(
-    `Starting Cinemex Scrapper. Enable: ${config.get('variables.cinemex')}`
+const cinepolisScrapper = () =>
+  brandScrapper(
+    config.get('variables.cinepolis'),
+    config.get('variables.retry'),
+    'cinepolisScrapper',
+    {
+      page,
+      movieRestriction: config.get('variables.movie_restriction'),
+      brandOptions: {
+        nameBrand: 'Cinépolis',
+        baseUrl: 'http://cinepolis.com',
+        momentToFilter: moment()
+          .locale('es')
+          .add(config.get('variables.days'), 'days')
+      },
+      ScrapperImp: ScrapperImpCinepolis,
+      BrandImp: BrandImpCinepolis,
+      MoviesByCityImp: MoviesByCityImpCinepolis,
+      LocationsByMovieAndCityImp: LocationsByMovieAndCityImpCinepolis,
+      SchedulesByMovieCityAndLocationImp: SchedulesByMovieCityAndLocationImpCinepolis,
+      methods: { uniqBy, flattenDepth }
+    }
   )
 
-  const finalMsg = `Cinepolis items count: 0`
-  logger.info(finalMsg)
-  return finalMsg
-}
+const cinemexScrapper = () =>
+  brandScrapper(
+    config.get('variables.cinemex'),
+    config.get('variables.retry'),
+    'cinemexScrapper',
+    {
+      page,
+      movieRestriction: config.get('variables.movie_restriction'),
+      brandOptions: {
+        nameBrand: 'Cinemex',
+        baseUrl: 'http://cinemex.com',
+        momentToFilter: moment()
+          .locale('es')
+          .add(config.get('variables.days'), 'days')
+      },
+      ScrapperImp: ScrapperImpCinemex,
+      BrandImp: undefined,
+      MoviesByCityImp: undefined,
+      LocationsByMovieAndCityImp: undefined,
+      SchedulesByMovieCityAndLocationImp: undefined,
+      methods: { uniqBy, flattenDepth }
+    }
+  )
+
 const publishAndExit = async (publishFunction, message, codeExit) => {
   if (codeExit !== 0) logger.error(message)
   await publishFunction(`${message}`, logger.path)
@@ -125,12 +165,10 @@ const handleFatalError = async err =>
       return Notifications.publish(`Starting: ${JSON.stringify(vars, null, 4)}`)
     })
     .then(preparePuppeteer)
-    .then(cinepolisScrapper)
-    .then(async cinepolis => {
-      const cinemex = await cinemexScrapper()
+    .then(async () => {
       return {
-        cinepolis,
-        cinemex
+        cinepolis: await cinepolisScrapper(),
+        cinemex: await cinemexScrapper()
       }
     })
     .then(async result => {

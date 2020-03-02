@@ -19,6 +19,7 @@ class BrandImp extends Brand {
       this._logo = await this._page.$eval('#img_logomaster', el => el.src)
     } catch (error) {
       logger.error(error)
+      throw Error(error)
     }
 
     logger.info(`scrapeLogo() logo: ${this._logo}`)
@@ -44,6 +45,7 @@ class BrandImp extends Brand {
       logger.info(`scrapeCities() ${this._cities.length} cities found`)
     } catch (error) {
       logger.error(error)
+      throw Error(error)
     }
   }
 }
