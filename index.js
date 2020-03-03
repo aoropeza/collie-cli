@@ -17,8 +17,14 @@ const {
   BrandImp: BrandImpCinepolis
 } = require('./src/implementations/cinepolis/BrandImp')
 const {
+  BrandImp: BrandImpCinemex
+} = require('./src/implementations/cinemex/BrandImp')
+const {
   MoviesByCityImp: MoviesByCityImpCinepolis
 } = require('./src/implementations/cinepolis/MoviesByCityImp')
+const {
+  MoviesByCityImp: MoviesByCityImpCinemex
+} = require('./src/implementations/cinemex/MoviesByCityImp')
 const {
   LocationsByMovieAndCity: LocationsByMovieAndCityImpCinepolis
 } = require('./src/implementations/cinepolis/LocationsByMovieAndCity')
@@ -136,8 +142,8 @@ const cinemexScrapper = () =>
           .add(config.get('variables.days'), 'days')
       },
       ScrapperImp: ScrapperImpCinemex,
-      BrandImp: undefined,
-      MoviesByCityImp: undefined,
+      BrandImp: BrandImpCinemex,
+      MoviesByCityImp: MoviesByCityImpCinemex,
       LocationsByMovieAndCityImp: undefined,
       SchedulesByMovieCityAndLocationImp: undefined,
       methods: { uniqBy, flattenDepth }

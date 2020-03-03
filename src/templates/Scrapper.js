@@ -54,6 +54,7 @@ class Scrapper extends Array {
     this._movies = await this.gettingAllMovies()
     // this._movies = {{ movie:{name: 'Judy',cover:'http://logo.jpg',anchorSchedule: 'path/judy'},city: { id: '20', key: 'cdmx-centro', text: 'CDMX Centro' }}}
 
+    return
     for (const movieByCountry of this._movies) {
       await this.goOrNotGo(movieByCountry.movie.anchorSchedule)
 
@@ -105,7 +106,12 @@ class Scrapper extends Array {
   async gettingAllMovies() {
     let movies = []
     for (const item of this._brand.cities) {
-      const moviesByCountry = new this._MoviesByCityImpClass(this._page, item)
+      const moviesByCountry = new this._MoviesByCityImpClass(
+        this._page,
+        item,
+        this._baseUrl,
+        { uniqBy: this._uniqBy }
+      )
       await moviesByCountry.startScrapper()
       movies = movies.concat(moviesByCountry.movies)
     }
