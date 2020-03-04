@@ -70,8 +70,8 @@ class LocationsByMovieAndCity extends LocationsBy {
                 itemTime => ({
                   time: itemTime.textContent,
                   // TODO
-                  duration: '',
-                  typeRoom: ''
+                  duration: 'N/A',
+                  typeRoom: 'N/A'
                 })
               )
             }

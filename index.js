@@ -68,7 +68,7 @@ const preparePuppeteer = async () => {
 const brandScrapper = async (enable, retry, name, paramsScrapper) => {
   return Promise.resolve()
     .then(() => {
-      logger.info(`Starting ${name}. Enable: ${enable}`)
+      logger.info(`:::::: STARTING ${name}. Enable: ${enable} :::::::`)
     })
     .then(async () => {
       if (enable) {
