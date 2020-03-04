@@ -49,7 +49,7 @@ class LocationsByMovieAndCity extends LocationsBy {
     try {
       await this._page.waitFor(
         `#cmbCiudadesHorario>option[value*="${this._filter.city.key}"]`,
-        config.waitForOptionsImmediately
+        config.waitForOptions
       )
       await this._page.select('#cmbCiudadesHorario', this._filter.city.key)
       await this._page.waitFor(5000)

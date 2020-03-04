@@ -74,6 +74,7 @@ class SchedulesByMovieCityAndLocation extends SchedulesBy {
           'YYYY-MM-DD H:mm'
         ).utcOffset(0),
         duration,
+        // TODO
         typeRoom: 'kids'
       }
     })

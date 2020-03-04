@@ -35,6 +35,7 @@ class MoviesByCityImp extends MoviesBy {
 
           return {
             movie: {
+              id: item.getAttribute('data-movie-id'),
               name: item.querySelector('.mycinema-item-title').innerText,
               cover: `https:${item
                 .querySelector('.billboard-movie-poster')
@@ -49,9 +50,11 @@ class MoviesByCityImp extends MoviesBy {
       throw Error(error)
     }
 
-    this._movies = allMovies.map(item =>
-      Object.assign(item, { city: this._filter })
-    )
+    const { url: anchorSchedule, ...city } = this._filter
+    this._movies = allMovies.map(item => ({
+      movie: { ...item.movie, anchorSchedule },
+      city
+    }))
     this._movies = this._uniqBy(this._movies, 'movie.name')
     logger.info(
       `startScrapper() ${this._movies.length} movies found for ${this._filter.text} citie`

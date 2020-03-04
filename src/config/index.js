@@ -39,12 +39,5 @@ class Config {
       timeout: this._config.get('variables.timeout_object')
     }
   }
-
-  // eslint-disable-next-line class-methods-use-this
-  get waitForOptionsImmediately() {
-    return {
-      timeout: 1000
-    }
-  }
 }
 module.exports = { Config }

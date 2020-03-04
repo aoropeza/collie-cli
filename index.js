@@ -29,6 +29,9 @@ const {
   LocationsByMovieAndCity: LocationsByMovieAndCityImpCinepolis
 } = require('./src/implementations/cinepolis/LocationsByMovieAndCity')
 const {
+  LocationsByMovieAndCity: LocationsByMovieAndCityImpCinemex
+} = require('./src/implementations/cinemex/LocationsByMovieAndCity')
+const {
   SchedulesByMovieCityAndLocation: SchedulesByMovieCityAndLocationImpCinepolis
 } = require('./src/implementations/cinepolis/SchedulesByMovieCityAndLocation')
 const { Logger } = require('./src/logger')
@@ -59,7 +62,7 @@ const preparePuppeteer = async () => {
 
   browser = await puppeteer.launch(options)
   page = await browser.newPage()
-  await page.setViewport({ width: 1000, height: 800 })
+  await page.setViewport({ width: 1200, height: 1000 })
 }
 
 const brandScrapper = async (enable, retry, name, paramsScrapper) => {
@@ -144,7 +147,7 @@ const cinemexScrapper = () =>
       ScrapperImp: ScrapperImpCinemex,
       BrandImp: BrandImpCinemex,
       MoviesByCityImp: MoviesByCityImpCinemex,
-      LocationsByMovieAndCityImp: undefined,
+      LocationsByMovieAndCityImp: LocationsByMovieAndCityImpCinemex,
       SchedulesByMovieCityAndLocationImp: undefined,
       methods: { uniqBy, flattenDepth }
     }

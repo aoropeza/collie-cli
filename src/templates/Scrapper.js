@@ -52,9 +52,11 @@ class Scrapper extends Array {
     await this._brand.startScrapper()
 
     this._movies = await this.gettingAllMovies()
-    // this._movies = {{ movie:{name: 'Judy',cover:'http://logo.jpg',anchorSchedule: 'path/judy'},city: { id: '20', key: 'cdmx-centro', text: 'CDMX Centro' }}}
+    // Cinepolis: this._movies = [{ movie:{name:'Judy',cover:'http://logo.jpg',anchorSchedule: 'path/judy'},
+    //                              city: { id: '20', key: 'cdmx-centro', text: 'CDMX Centro' }}]
+    // Cinemex: this._movies =   [{ movie:{id:'40137',name:'Judy',cover:'http://logo.jpg',anchorSchedule: '/cartelera/estado-8/cdmx-y-Area-metropolitana' },
+    //                              city: { id: 'estado-8', text: 'CDMX y Área Metropolitana' } }]
 
-    return
     for (const movieByCountry of this._movies) {
       await this.goOrNotGo(movieByCountry.movie.anchorSchedule)
 
@@ -62,26 +64,28 @@ class Scrapper extends Array {
         this._page,
         {
           movie: movieByCountry.movie,
-          city: movieByCountry.city
+          city: movieByCountry.city,
+          date: this._momentToFilter
         }
       )
       await locationsByMovieAndCity.startScrapper()
       this._locations.push(locationsByMovieAndCity)
-      // locationsByMovieAndCity.locations = [{ name: 'Cinépolis VIP Plaza Satélite', index: '0' }]
 
-      for (const location of locationsByMovieAndCity.locations) {
-        await locationsByMovieAndCity.unSelectLocations()
+      if (this._SchedulesByMovieCityAndLocationImpClass) {
+        for (const location of locationsByMovieAndCity.locations) {
+          await locationsByMovieAndCity.unSelectLocations()
 
-        const scheduleByMovieCityAndLocation = new this._SchedulesByMovieCityAndLocationImpClass(
-          this._page,
-          {
-            selectedLocation: location,
-            allLocations: locationsByMovieAndCity.locations,
-            date: this._momentToFilter
-          }
-        )
-        const times = await scheduleByMovieCityAndLocation.startScrapper()
-        location.times = times
+          const scheduleByMovieCityAndLocation = new this._SchedulesByMovieCityAndLocationImpClass(
+            this._page,
+            {
+              selectedLocation: location,
+              allLocations: locationsByMovieAndCity.locations,
+              date: this._momentToFilter
+            }
+          )
+          const times = await scheduleByMovieCityAndLocation.startScrapper()
+          location.times = times
+        }
       }
     }
 
@@ -92,7 +96,7 @@ class Scrapper extends Array {
   async goOrNotGo(newUrlKey) {
     if (this.lastKeyUrl !== newUrlKey) {
       this.lastKeyUrl = newUrlKey
-      const gotoUrl = `${this._baseUrl}/${this.lastKeyUrl}`
+      const gotoUrl = `${this._baseUrl}${this.lastKeyUrl}`
       logger.info(`(goOrNotGo) Going to ${gotoUrl}`)
       try {
         await this._page.goto(gotoUrl, config.gotoOptions)

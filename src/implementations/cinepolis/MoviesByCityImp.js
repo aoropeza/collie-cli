@@ -36,10 +36,10 @@ class MoviesByCityImp extends MoviesBy {
                     .querySelector('figure')
                     .querySelector('img')
                     .getAttribute('src'),
-                  anchorSchedule: item
+                  anchorSchedule: `/${item
                     .querySelector('.btn-call')
                     .querySelector('a[onclick*="LinkSinopsis"]')
-                    .getAttribute('href')
+                    .getAttribute('href')}`
                 }
               }
             : {}
