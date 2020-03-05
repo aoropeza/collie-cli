@@ -1,8 +1,5 @@
 'use strict'
 
-const fs = require('fs')
-const { promisify } = require('util')
-
 const { v4: uuidv4 } = require('uuid')
 const chalk = require('chalk')
 const { createLogger, format, transports } = require('winston')
@@ -11,7 +8,6 @@ const { combine } = format
 const { Config } = require('../config')
 
 const config = new Config()
-const readFile = promisify(fs.readFile)
 
 class Logger {
   constructor(nameSpace, depth = 0, rgb = [255, 255, 255]) {

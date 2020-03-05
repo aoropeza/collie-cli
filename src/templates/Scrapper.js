@@ -134,9 +134,7 @@ class Scrapper extends Array {
             .length > 0
       )
     }
-
     movies = movies.sort((x, y) => x.movie.name.localeCompare(y.movie.name))
-
     logger.info(
       `gettingAllMovies() ${movies.length}  movies of ${this._brand.cities.length} cities`
     )

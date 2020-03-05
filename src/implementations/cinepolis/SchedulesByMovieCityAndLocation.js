@@ -58,7 +58,9 @@ class SchedulesByMovieCityAndLocation extends SchedulesBy {
       )
     } catch (error) {
       logger.error(error)
-      throw Error(error)
+      logger.warn(
+        `scrapeSchedules() '${this._filter.movie.name}' doesn't have schedules at '${this._filter.selectedLocation.name}'`
+      )
     }
 
     const times = await Promise.all(promisesToScrappedTimes)

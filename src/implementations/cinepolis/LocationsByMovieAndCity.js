@@ -69,10 +69,10 @@ class LocationsByMovieAndCity extends LocationsBy {
       )
       logger.info(this._locations.map(item => item.name).join(', '))
     } catch (error) {
-      logger.error(
+      logger.error(`scrapeLocations(): ${error.message}`)
+      logger.warn(
         `scrapeLocations() '${this._filter.movie.name}' doesn't have locations in '${this._filter.city.key}'`
       )
-      throw Error(error)
     }
   }
 
