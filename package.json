@@ -20,7 +20,7 @@
     "collie-uses-cases": "git+https://github.com/aoropeza/collie-uses-cases.git#develop",
     "convict": "^5.2.0",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "nodemailer": "^6.4.3",
     "puppeteer": "^2.0.0",
     "uuid": "^7.0.1",
